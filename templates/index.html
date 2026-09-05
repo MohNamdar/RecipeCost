@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامانه کنترل قیمت آیتم‌ها</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#EEF2ED;
+  --surface:#FFFFFF;
+  --surface-2:#F4F6F2;
+  --border:#DDE3D9;
+  --ink:#232420;
+  --ink-soft:#5B6158;
+  --plum:#7C2E4C;
+  --plum-dark:#5C2038;
+  --plum-soft:#F3E4EA;
+  --mango:#D98A3D;
+  --mango-soft:#FBEBD8;
+  --green:#3E7856;
+  --green-soft:#E4F0E8;
+  --red:#B4443A;
+  --red-soft:#F8E4E1;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(35,36,32,.06), 0 4px 14px rgba(35,36,32,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Vazirmatn',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  font-size:14.5px;
+}
+::selection{background:var(--plum-soft)}
+.app{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
+.topbar{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;margin-bottom:20px;flex-wrap:wrap;
+}
+.brand h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-.2px}
+.brand p{margin:4px 0 0;color:var(--ink-soft);font-size:13px}
+.brand .tag{display:inline-block;background:var(--plum);color:#fff;font-size:11px;padding:2px 8px;border-radius:20px;margin-inline-start:8px;vertical-align:2px;font-weight:600}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+button{
+  font-family:inherit;cursor:pointer;border:1px solid var(--border);
+  background:var(--surface);color:var(--ink);border-radius:8px;
+  padding:9px 14px;font-size:13.5px;font-weight:600;transition:.12s;
+}
+button:hover{border-color:var(--plum);color:var(--plum)}
+button.primary{background:var(--plum);border-color:var(--plum);color:#fff}
+button.primary:hover{background:var(--plum-dark);color:#fff}
+button.ghost{background:transparent;border-color:transparent;color:var(--ink-soft)}
+button.ghost:hover{background:var(--surface-2);color:var(--ink)}
+button.danger{color:var(--red);border-color:var(--red-soft)}
+button.danger:hover{background:var(--red-soft);border-color:var(--red)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:disabled:hover{border-color:var(--border);color:var(--ink)}
+.tabs{background:var(--surface-2);position:sticky;top:0;display:flex;gap:4px;border-bottom:1.5px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tab{
+  padding:10px 16px;font-weight:700;font-size:13.5px;color:var(--ink-soft);
+  border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;
+}
+.tab.active{color:var(--plum);border-color:var(--plum)}
+.tab .count{background:var(--surface-2);color:var(--ink-soft);border-radius:20px;font-size:11px;padding:1px 7px;margin-inline-start:5px}
+.tab.active .count{background:var(--plum-soft);color:var(--plum)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.pad{padding:16px}
+.section-title{font-size:15px;font-weight:800;margin:0 0 4px}
+.section-sub{color:var(--ink-soft);font-size:12.5px;margin:0 0 14px}
+table{width:100%;border-collapse:collapse}
+th{
+  text-align:right;font-size:11.5px;color:var(--ink-soft);font-weight:700;
+  padding:9px 10px;border-bottom:1.5px solid var(--border);white-space:nowrap;
+}
+td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13.5px}
+tr:last-child td{border-bottom:none}
+tr.clickable{cursor:pointer}
+tr.clickable:hover{background:var(--surface-2)}
+.num{font-variant-numeric:tabular-nums;direction:rtl;text-align:right;font-family:inherit}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.pill.warn{background:var(--mango-soft);color:#8a5720}
+.pill.bad{background:var(--red-soft);color:var(--red)}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.neutral{background:var(--surface-2);color:var(--ink-soft)}
+input[type=number],input[type=text]{
+  font-family:inherit;border:1px solid var(--border);border-radius:7px;
+  padding:6px 9px;font-size:13.5px;width:100%;background:#fff;color:var(--ink);
+}
+input[type=number]{direction:ltr;text-align:left}
+input:focus{outline:2px solid var(--plum-soft);border-color:var(--plum)}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+select{
+  font-family:inherit;border:1px solid var(--border);border-radius:7px;
+  padding:6px 9px;font-size:13px;background:#fff;color:var(--ink);
+}
+select:focus{outline:2px solid var(--plum-soft);border-color:var(--plum)}
+.unit-select{width:84px}
+.qty-with-unit{display:flex;align-items:center;gap:6px}
+.qty-with-unit input{width:100%}
+.inline-name-input{font-weight:600;border:1px solid transparent;background:transparent;padding:5px 6px;border-radius:6px}
+.inline-name-input:hover{border-color:var(--border)}
+.inline-name-input:focus{border-color:var(--plum);background:#fff}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:15px;padding:4px 7px;border-radius:6px;color:var(--ink-soft)}
+.icon-btn:hover{background:var(--red-soft);color:var(--red)}
+.recipe-name-input,.recipe-container-input{font-weight:700;font-size:15px;border:1px solid var(--border);border-radius:8px;padding:7px 10px}
+.recipe-name-input{flex:1;margin-inline-end:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:5px}
+.field .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px}
+.banner{
+  display:flex;align-items:flex-start;gap:10px;background:var(--green-soft);
+  border:1px solid #cfe4d6;color:#2c5d42;border-radius:var(--radius);
+  padding:12px 14px;margin-bottom:16px;font-size:13px;
+}
+.banner.warn{background:var(--mango-soft);border-color:#f0d3a8;color:#8a5720}
+.banner b{font-weight:800}
+.banner ul{margin:6px 0 0;padding-inline-start:18px}
+.banner .close{margin-inline-start:auto;background:none;border:none;color:inherit;font-weight:700;cursor:pointer;padding:0 4px}
+.modal-bg{
+  position:fixed;inset:0;background:rgba(35,36,32,.42);display:flex;
+  align-items:center;justify-content:center;z-index:50;padding:16px;
+}
+.modal{background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border)}
+.modal-head h3{margin:0;font-size:16px;font-weight:800}
+.modal-body{padding:18px}
+.modal-foot{padding:14px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.item-row{display:grid;grid-template-columns:1fr 100px 90px 32px;gap:8px;align-items:center;margin-bottom:8px}
+.item-row .ing-name{font-size:13px}
+.item-row select{width:100%;font-family:inherit;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:13px;background:#fff}
+.subtle-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px}
+.subtle-btn:hover{background:var(--red-soft)}
+.summary-box{background:var(--surface-2);border-radius:9px;padding:12px 14px;margin-top:12px;font-size:13px}
+.summary-row{display:flex;justify-content:space-between;padding:3px 0}
+.summary-row.total{font-weight:800;font-size:15px;color:var(--plum);border-top:1px dashed var(--border);margin-top:6px;padding-top:8px}
+.empty{padding:40px 20px;text-align:center;color:var(--ink-soft)}
+.empty .big{font-size:32px;margin-bottom:8px}
+.footnote{color:var(--ink-soft);font-size:12px;margin-top:10px}
+.log-item{border-bottom:1px solid var(--border);padding:14px 4px}
+.log-item:last-child{border-bottom:none}
+.log-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.log-meta{font-size:12px;color:var(--ink-soft)}
+.log-affected{margin-top:8px;background:var(--surface-2);border-radius:8px;padding:8px 10px;font-size:12.5px}
+.arrow{color:var(--ink-soft);margin:0 4px}
+.chip-price-old{color:var(--red);text-decoration:line-through;opacity:.75}
+.chip-price-new{color:var(--green);font-weight:700}
+.search-box{margin-bottom:12px}
+.search-box input{max-width:280px}
+.category-filter{min-width:160px}
+.purchase-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:720px){.purchase-grid{grid-template-columns:1fr}}
+.toolbar{position:sticky;top:45px; background: white;padding-top: 5px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.badge-review{background:var(--red-soft);color:var(--red);border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:700;margin-inline-start:6px}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:#cfd6cb;border-radius:8px}
+</style>
+</head>
+<body>
+<div id="root" class="app"></div>
+<script>
+const SEED_DATA = {"ingredients":[{"id":"ing_001","name":"بستنی","unitPrice":0.416667,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.416667},{"id":"ing_002","name":"انبه","unitPrice":1.25,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.25},{"id":"ing_003","name":"توت فرنگی","unitPrice":0.5,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.5},{"id":"ing_004","name":"کره بادام","unitPrice":0.58,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.58},{"id":"ing_005","name":"آلوئه ورا","unitPrice":0.068966,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.068966},{"id":"ing_006","name":"چای احمد","unitPrice":2.2,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":2.2},{"id":"ing_007","name":"عسل","unitPrice":1.1,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.1},{"id":"ing_008","name":"شیر","unitPrice":0.11,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.11},{"id":"ing_009","name":"شیر کم","unitPrice":0.14,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.14},{"id":"ing_010","name":"خلال بادام","unitPrice":4.5,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":4.5},{"id":"ing_011","name":"لیموترش","unitPrice":0.58,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.58},{"id":"ing_012","name":"تمشک","unitPrice":1.166667,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.166667},{"id":"ing_013","name":"شکر","unitPrice":0.122222,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.122222},{"id":"ing_014","name":"پروتئین وی","unitPrice":3.861111,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":3.861111},{"id":"ing_015","name":"پوره","unitPrice":1.04,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.04},{"id":"ing_016","name":"هایمیکس","unitPrice":1.21,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.21},{"id":"ing_017","name":"کره پسته","unitPrice":2.55,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":2.55},{"id":"ing_018","name":"اسپرایت","unitPrice":0.076667,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.076667},{"id":"ing_019","name":"آب میوه","unitPrice":0.26,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.26},{"id":"ing_020","name":"دانه چیا","unitPrice":1.333333,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.333333},{"id":"ing_021","name":"موز","unitPrice":0.166667,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.166667},{"id":"ing_022","name":"هات چاکلت","unitPrice":1.69,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.69},{"id":"ing_023","name":"تاپینگ","unitPrice":1.7,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.7},{"id":"ing_024","name":"پنیر خامه","unitPrice":0.4,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.4},{"id":"ing_025","name":"سودا","unitPrice":0.06,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.06},{"id":"ing_026","name":"عرق هل","unitPrice":0.47,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.47},{"id":"ing_027","name":"ماست یو","unitPrice":0.246667,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.246667},{"id":"ing_028","name":"کرک پسته","unitPrice":1.7,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.7},{"id":"ing_029","name":"س کنسی","unitPrice":0.695,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.695},{"id":"ing_030","name":"جو دوسر","unitPrice":0.3,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.3},{"id":"ing_031","name":"پتی بور","unitPrice":1.75,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.75},{"id":"ing_032","name":"عرقیجات","unitPrice":0.15,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.15},{"id":"ing_033","name":"سایرو","unitPrice":1.2,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":1.2},{"id":"ing_034","name":"خامه","unitPrice":0.455,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":0.455},{"id":"ing_035","name":"قهوه","unitPrice":2.5,"unit":"gram","linked":true,"purchaseQty":1,"purchasePrice":2.5},{"id":"ing_036","name":"سس کارامل-انبه","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_037","name":"پوره انبه","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_038","name":"شکلات-سس کارامل","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_039","name":"دیپ شکلات","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_040","name":"کره بادام زمینی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_041","name":"سیروپ کارامل","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_042","name":"سس شکلات","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_043","name":"سس آلبالو-توت فرنگی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_044","name":"بستنی وانیلی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_045","name":"پوره توت‌فرنگی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_046","name":"نوتلا","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_047","name":"پسته کامل و پودر","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_048","name":"مارشمالو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_049","name":"سیروپ وانیل","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_050","name":"تمشک-توت فرنگی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_051","name":"پوره بری‌ها","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_052","name":"سس شکلات-پتی‌بور","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_053","name":"اسپرسو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_054","name":"پنیر خامه‌ای","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_055","name":"پتی‌بور","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_056","name":"اسلایس لیمو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_057","name":"لیمو ترش","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_058","name":"هایمیکس لیموناد","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_059","name":"لیمو، توت فرنگی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_060","name":"س توت فرنگی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_061","name":"اسلایس لیمو و نعنا","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_062","name":"نعنا-یک مشت","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_063","name":"هایمیکس موهیتو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_064","name":"لیمو، توت فرنگی، نعنا","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_065","name":"نعنا","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_066","name":"آبلیمو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_067","name":"سیروپ نعنا","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_068","name":"تخم شربتی    وسط یخ کراش","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_069","name":"تاپ پنیرک","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_070","name":"هایمیکس میکس بری","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_071","name":"پوره میکس بری","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_072","name":"هایم میکس بری","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_073","name":"توت فرنگی-تمشک","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_074","name":"آب آلبالو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_075","name":"سیروپ شاتوت","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_076","name":"آب آناناس","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_077","name":"س پشن فروت","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_078","name":"سیروپ نارگیل","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_079","name":"پودر نارگیل","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_080","name":"اسلایس پرتغال","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_081","name":"پرتغال","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_082","name":"هایمیکس پرتغال","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_083","name":"عرق بیدمشک","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_084","name":"انبه، فلفل، گل، لیمو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_085","name":"آب لیمو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_086","name":"فلفل","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_087","name":"عرق نعنا","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_088","name":"ماست یونانی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_089","name":"دانه چیا - استویا","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_090","name":"شیر کم چرب","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_091","name":"پودر وی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_092","name":"موز - کره بادام زمینی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_093","name":"یخ کیوب","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_094","name":"توت فرنگی - تمشک","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_095","name":"روغن زیتون","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_096","name":"استیک مرغ گریل","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_097","name":"بروکلی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_098","name":"گل، پسته، دارچین","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_099","name":"سیروپ رز","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_100","name":"سیروپ زعفران","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_101","name":"زعفران","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_102","name":"گل، لیمو، شکر رنگی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_103","name":"سردم سبز","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_104","name":"س وانیل","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_105","name":"اکلیل خوراکی طلایی","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_106","name":"گل، لیمو","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_107","name":"سردم سفید","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0},{"id":"ing_108","name":"آب آلوئه ورا","unitPrice":0,"unit":"gram","linked":false,"purchaseQty":0,"purchasePrice":0}],"recipes":[{"id":"rec_001","name":"شیک انبه","items":[{"ingredientId":"ing_036","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_001","qty":230,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_034","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_037","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_002","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"لیوان شیک"},{"id":"rec_002","name":"شیک اسنیکرز","items":[{"ingredientId":"ing_038","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_001","qty":240,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_039","qty":55,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_040","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_041","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"لیوان شیک"},{"id":"rec_003","name":"شیک شکلات","items":[{"ingredientId":"ing_042","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_001","qty":250,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_034","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_039","qty":60,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"لیوان شیک"},{"id":"rec_004","name":"شیک توت فرنگی","items":[{"ingredientId":"ing_043","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_044","qty":230,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_034","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_045","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_003","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"لیوان شیک"},{"id":"rec_005","name":"شیک نوتلا","items":[{"ingredientId":"ing_042","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_001","qty":250,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_034","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":55,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_046","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"لیوان شیک"},{"id":"rec_006","name":"شیک پسته","items":[{"ingredientId":"ing_047","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_001","qty":250,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_034","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":55,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_017","qty":30,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"لیوان شیک"},{"id":"rec_007","name":"شیک وانیل","items":[{"ingredientId":"ing_048","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_001","qty":250,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_034","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_049","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"لیوان شیک"},{"id":"rec_008","name":"شیک سالار","items":[{"ingredientId":"ing_050","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_001","qty":240,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_034","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_051","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_012","qty":0,"qtyRawText":"کم","isGarnish":false,"needsReview":true}],"category":"لیوان شیک"},{"id":"rec_009","name":"شیک تیرامیسو","items":[{"ingredientId":"ing_052","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_053","qty":1,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_054","qty":70,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_001","qty":220,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_055","qty":5,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"لیوان شیک"},{"id":"rec_010","name":"لیموناد","items":[{"ingredientId":"ing_056","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_057","qty":3,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_018","qty":120,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_013","qty":25,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_058","qty":5,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"کازابلانکا"},{"id":"rec_011","name":"رد لیموناد","items":[{"ingredientId":"ing_059","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_003","qty":6,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_060","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_057","qty":1.5,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_018","qty":100,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_013","qty":15,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"جام"},{"id":"rec_012","name":"موهیتو","items":[{"ingredientId":"ing_061","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_057","qty":1.5,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_018","qty":120,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_062","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_013","qty":25,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_063","qty":5,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"کازابلانکا"},{"id":"rec_013","name":"رد موهیتو","items":[{"ingredientId":"ing_064","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_003","qty":6,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_060","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_057","qty":1,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_065","qty":1.4,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_018","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_013","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"کازابلانکا"},{"id":"rec_014","name":"نیو موهیتو","items":[{"ingredientId":"ing_061","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_066","qty":30,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_067","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_068","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false}],"category":"جام-یخ کراش"},{"id":"rec_015","name":"تمشک بهشتی","items":[{"ingredientId":"ing_069","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_012","qty":30,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_070","qty":35,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"جام-یخ کراش"},{"id":"rec_016","name":"پینک ولوت","items":[{"ingredientId":"ing_003","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_021","qty":100,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_003","qty":100,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_005","qty":110,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_071","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_072","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"جام"},{"id":"rec_017","name":"وری بری","items":[{"ingredientId":"ing_073","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_012","qty":60,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_003","qty":110,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_074","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_071","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_075","qty":15,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"جام"},{"id":"rec_018","name":"وری استوایی","items":[{"ingredientId":"ing_036","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_002","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_021","qty":70,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_037","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_076","qty":130,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_077","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"جام"},{"id":"rec_019","name":"طلوع استوایی","items":[{"ingredientId":"ing_002","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_021","qty":70,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":130,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_078","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_079","qty":0,"qtyRawText":"کم","isGarnish":false,"needsReview":true},{"ingredientId":"ing_037","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_041","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"جام"},{"id":"rec_020","name":"موج نارنجی","items":[{"ingredientId":"ing_080","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_081","qty":2,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_018","qty":60,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_013","qty":25,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_082","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_074","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_083","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"کازابلانکا"},{"id":"rec_021","name":"شعله سرد","items":[{"ingredientId":"ing_084","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_037","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_085","qty":15,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_086","qty":0.5,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_087","qty":15,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_077","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_025","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"گیلاس"},{"id":"rec_022","name":"شیک موز و بادام پروتئینی","items":[{"ingredientId":"ing_088","qty":100,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_089","qty":8,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_090","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_091","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_044","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_092","qty":0,"qtyRawText":"30-20","isGarnish":false,"needsReview":true},{"ingredientId":"ing_093","qty":0,"qtyRawText":"1بیل","isGarnish":false,"needsReview":true}],"category":"لیوان شیک"},{"id":"rec_023","name":"شیک بری پروتئینی","items":[{"ingredientId":"ing_088","qty":100,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_089","qty":8,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_090","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_091","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_044","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_094","qty":0,"qtyRawText":"50+20","isGarnish":false,"needsReview":true},{"ingredientId":"ing_093","qty":0,"qtyRawText":"یک بیل","isGarnish":false,"needsReview":true}],"category":"لیوان شیک"},{"id":"rec_024","name":"استیک مرغ گریل","items":[{"ingredientId":"ing_095","qty":0,"qtyRawText":"کم","isGarnish":false,"needsReview":true},{"ingredientId":"ing_096","qty":200,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_097","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"بشقاب گرد متوسط"},{"id":"rec_025","name":"پرشین لاو","items":[{"ingredientId":"ing_098","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_008","qty":200,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_099","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_026","qty":5,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_100","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_007","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_001","qty":70,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"کاپ لته"},{"id":"rec_026","name":"شیک سنتی","items":[{"ingredientId":"ing_101","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_001","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_008","qty":40,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_034","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_026","qty":5,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_100","qty":15,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_099","qty":5,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"بلند"},{"id":"rec_027","name":"تلخ شگفت‌انگیز","items":[{"ingredientId":"ing_102","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_103","qty":70,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_085","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_077","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_104","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_105","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false}],"category":"گیلاس"},{"id":"rec_028","name":"شیرین شگفت‌انگیز","items":[{"ingredientId":"ing_106","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false},{"ingredientId":"ing_107","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_108","qty":50,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_085","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_026","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_077","qty":25,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_105","qty":0,"qtyRawText":null,"isGarnish":true,"needsReview":false}],"category":"گیلاس"}],"settings":{"wasteRate":0.1,"overheadCost":89.0625,"packagingCost":18,"otherCost":16,"marginRate":0.5}};
+const UNIT_LABEL = { gram: 'گرم', kg: 'کیلو', count: 'عدد' };
+
+const fa = (n) => Number(n).toLocaleString('fa-IR', {maximumFractionDigits:2});
+const price = (n) => fa(Math.round(n)) + ' هزار تومان';
+const uid = (p) => p + '_' + Math.random().toString(36).slice(2,9);
+const nowStr = () => new Date().toLocaleString('fa-IR', {dateStyle:'medium', timeStyle:'short'});
+
+let STATE = {
+  ingredients: [],
+  recipes: [],
+  settings: {},
+  log: [],
+  loaded: false,
+};
+
+let UI = {
+  tab: 'products',
+  banner: null,
+  expandedRecipe: null,
+  editModal: null, // {type, id}
+  ingredientSearch: '',
+  productSearch: '',
+  categoryFilter: '',
+};
+
+// ---------- SQLite-backed storage via local Flask API ----------
+const DATA_KEY = 'app-data-v2';
+const LOG_KEY = 'app-log-v2';
+
+async function loadState(){
+  try{
+    const [dataRes, logRes] = await Promise.all([ safeGet(DATA_KEY), safeGet(LOG_KEY) ]);
+    if(dataRes){
+      STATE.ingredients = dataRes.ingredients || [];
+      STATE.recipes = dataRes.recipes || [];
+      STATE.settings = dataRes.settings || {};
+    } else {
+      STATE.ingredients = JSON.parse(JSON.stringify(SEED_DATA.ingredients));
+      STATE.recipes = JSON.parse(JSON.stringify(SEED_DATA.recipes));
+      STATE.settings = JSON.parse(JSON.stringify(SEED_DATA.settings));
+      await persistData();
+    }
+    // migrate older records defensively
+    STATE.ingredients.forEach(i=>{
+      if(i.purchaseQty === undefined){ i.purchaseQty = i.unitPrice ? 1 : 0; }
+      if(i.purchasePrice === undefined){ i.purchasePrice = i.unitPrice || 0; }
+      i.unitPrice = (Number(i.purchaseQty)>0) ? Number(i.purchasePrice||0)/Number(i.purchaseQty) : 0;
+    });
+    STATE.recipes.forEach(r=>{
+      if(r.category === undefined) r.category = r.container || '';
+      delete r.container;
+    });
+    STATE.log = logRes || [];
+    await persistData();
+  }catch(e){
+    console.error(e);
+    STATE.ingredients = JSON.parse(JSON.stringify(SEED_DATA.ingredients));
+    STATE.recipes = JSON.parse(JSON.stringify(SEED_DATA.recipes));
+    STATE.settings = JSON.parse(JSON.stringify(SEED_DATA.settings));
+    STATE.log = [];
+  }
+  STATE.loaded = true;
+  render();
+}
+
+async function safeGet(key){
+  try{
+    const r = await fetch('/api/storage/'+encodeURIComponent(key));
+    if(r.status===404) return null;
+    if(!r.ok) throw new Error('storage get failed');
+    const x = await r.json();
+    return x.value ?? null;
+  }catch(e){ console.error(e); return null; }
+}
+async function safeSet(key, val){
+  try{
+    const r = await fetch('/api/storage/'+encodeURIComponent(key), {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({value:val})
+    });
+    if(!r.ok) throw new Error('storage set failed');
+  }catch(e){ console.error('storage set failed', key, e); }
+}
+async function persistData(){
+  await safeSet(DATA_KEY, { ingredients: STATE.ingredients, recipes: STATE.recipes, settings: STATE.settings });
+}
+async function persistLog(){ await safeSet(LOG_KEY, STATE.log); }
+
+// ---------- domain logic ----------
+function ingredientById(id){ return STATE.ingredients.find(i=>i.id===id); }
+function recipeById(id){ return STATE.recipes.find(r=>r.id===id); }
+
+function computeRecipeCost(recipe){
+  let material = 0;
+  for(const it of recipe.items){
+    if(it.isGarnish) continue;
+    const ing = ingredientById(it.ingredientId);
+    const p = ing ? ing.unitPrice : 0;
+    material += (it.qty||0) * p;
+  }
+  const s = STATE.settings;
+  const finalPrice = ((material * (1+s.wasteRate)) + s.overheadCost + s.packagingCost + s.otherCost) * (1+s.marginRate);
+  return { material, finalPrice };
+}
+
+function allRecipeCosts(){
+  const map = {};
+  for(const r of STATE.recipes) map[r.id] = computeRecipeCost(r);
+  return map;
+}
+
+function recipesUsingIngredient(ingId){
+  return STATE.recipes.filter(r => r.items.some(it => it.ingredientId === ingId && !it.isGarnish));
+}
+
+function applyChangeAndLog(changeMeta, prevCosts){
+  const newCosts = allRecipeCosts();
+  const affected = [];
+  for(const r of STATE.recipes){
+    const before = prevCosts[r.id];
+    const after = newCosts[r.id];
+    if(before && after && Math.round(before.finalPrice) !== Math.round(after.finalPrice)){
+      affected.push({
+        recipeId: r.id, recipeName: r.name,
+        oldPrice: Math.round(before.finalPrice), newPrice: Math.round(after.finalPrice)
+      });
+    }
+  }
+  const entry = { id: uid('log'), ts: Date.now(), tsLabel: nowStr(), ...changeMeta, affected };
+  STATE.log.unshift(entry);
+  persistLog();
+  return affected;
+}
+
+function showBanner(affected, subject){
+  if(affected.length === 0){
+    UI.banner = { type:'info', text: `«${subject}» ذخیره شد؛ قیمت نهایی هیچ محصولی تغییر نکرد.` };
+  } else {
+    UI.banner = { type:'warn', subject, affected };
+  }
+}
+
+// ---------- ingredient mutations ----------
+function updateIngredientPurchase(id, purchasePrice, purchaseQty){
+  const ing = ingredientById(id);
+  if(!ing) return;
+  purchasePrice = Number(purchasePrice)||0;
+  purchaseQty = Number(purchaseQty)||0;
+  const oldUnitPrice = ing.unitPrice||0;
+  const oldPurchasePrice = ing.purchasePrice||0;
+  const oldPurchaseQty = ing.purchaseQty||0;
+  if(oldPurchasePrice===purchasePrice && oldPurchaseQty===purchaseQty) return;
+  const prevCosts = allRecipeCosts();
+  ing.purchasePrice = purchasePrice;
+  ing.purchaseQty = purchaseQty;
+  ing.unitPrice = purchaseQty>0 ? purchasePrice/purchaseQty : 0;
+  persistData();
+  const affected = applyChangeAndLog({
+    type:'ingredient_price', targetId:ing.id, targetName:ing.name,
+    field:'خرید (مبلغ / مقدار)', oldValue:`${oldPurchasePrice} / ${oldPurchaseQty}`, newValue:`${purchasePrice} / ${purchaseQty}`,
+    oldUnitPrice, newUnitPrice: ing.unitPrice
+  }, prevCosts);
+  showBanner(affected, ing.name);
+  render();
+}
+
+function updateIngredientName(id, newName){
+  const ing = ingredientById(id);
+  if(!ing || !newName || ing.name === newName) return;
+  const oldName = ing.name;
+  ing.name = newName;
+  persistData();
+  applyChangeAndLog({ type:'ingredient_rename', targetId: ing.id, targetName: newName, field:'نام ماده اولیه', oldValue: oldName, newValue: newName }, allRecipeCosts());
+  render();
+}
+
+function updateIngredientUnit(id, newUnit){
+  const ing = ingredientById(id);
+  if(!ing || ing.unit === newUnit) return;
+  const oldUnit = ing.unit;
+  ing.unit = newUnit;
+  persistData();
+  applyChangeAndLog({ type:'ingredient_unit', targetId: ing.id, targetName: ing.name, field:'واحد اندازه‌گیری', oldValue: UNIT_LABEL[oldUnit], newValue: UNIT_LABEL[newUnit] }, allRecipeCosts());
+  render();
+}
+
+function createIngredient(name, purchasePrice, purchaseQty, unit){
+  purchasePrice = Number(purchasePrice)||0; purchaseQty = Number(purchaseQty)||0;
+  const ing = { id:uid('ing'), name, purchasePrice, purchaseQty, unitPrice:purchaseQty>0?purchasePrice/purchaseQty:0, unit:unit||'gram' };
+  STATE.ingredients.push(ing);
+  persistData();
+  applyChangeAndLog({ type:'ingredient_add', targetId:ing.id, targetName:name, field:'ماده اولیه جدید', oldValue:'-', newValue:`${purchasePrice} / ${purchaseQty}` }, allRecipeCosts());
+  return ing;
+}
+
+function deleteIngredient(id){
+  const ing = ingredientById(id);
+  if(!ing) return;
+  const usedIn = recipesUsingIngredient(id);
+  const prevCosts = allRecipeCosts();
+  STATE.recipes.forEach(r => { r.items = r.items.filter(it => it.ingredientId !== id); });
+  STATE.ingredients = STATE.ingredients.filter(i => i.id !== id);
+  persistData();
+  const affected = applyChangeAndLog({
+    type:'ingredient_delete', targetId: id, targetName: ing.name,
+    field:'حذف ماده اولیه', oldValue: ing.unitPrice, newValue: '-'
+  }, prevCosts);
+  showBanner(affected, ing.name + ' (حذف شد)');
+  render();
+}
+
+// ---------- settings mutations ----------
+function updateSetting(key, newVal, label){
+  const oldVal = STATE.settings[key];
+  if(oldVal === newVal) return;
+  const prevCosts = allRecipeCosts();
+  STATE.settings[key] = newVal;
+  persistData();
+  const affected = applyChangeAndLog({
+    type:'setting', targetId: key, targetName: label,
+    field: label, oldValue: oldVal, newValue: newVal
+  }, prevCosts);
+  showBanner(affected, label);
+  render();
+}
+
+// ---------- recipe mutations ----------
+function updateRecipeItemQty(recipeId, ingredientId, newQty){
+  const r = recipeById(recipeId);
+  const item = r.items.find(i=>i.ingredientId===ingredientId);
+  if(!item || item.qty === newQty) return;
+  const oldQty = item.qty;
+  const prevCosts = allRecipeCosts();
+  item.qty = newQty;
+  item.needsReview = false;
+  item.qtyRawText = null;
+  persistData();
+  const affected = applyChangeAndLog({
+    type:'recipe_qty', targetId: r.id, targetName: r.name,
+    field: `مقدار ${ingredientById(ingredientId)?.name || ''}`, oldValue: oldQty, newValue: newQty
+  }, prevCosts);
+  showBanner(affected, r.name);
+  render();
+}
+
+function addIngredientToRecipe(recipeId, ingredientId, qty){
+  const r = recipeById(recipeId);
+  if(r.items.some(i=>i.ingredientId===ingredientId)) return;
+  const prevCosts = allRecipeCosts();
+  r.items.push({ ingredientId, qty, qtyRawText:null, isGarnish:false, needsReview:false });
+  persistData();
+  const affected = applyChangeAndLog({
+    type:'recipe_item_add', targetId:r.id, targetName:r.name,
+    field:`افزودن ${ingredientById(ingredientId)?.name||''}`, oldValue:'-', newValue:qty
+  }, prevCosts);
+  showBanner(affected, r.name);
+  UI.editModal = { type:'recipe', id: recipeId };
+  render();
+}
+
+function removeIngredientFromRecipe(recipeId, ingredientId){
+  const r = recipeById(recipeId);
+  const idx = r.items.findIndex(i=>i.ingredientId===ingredientId);
+  if(idx<0) return;
+  const removed = r.items[idx];
+  const prevCosts = allRecipeCosts();
+  r.items.splice(idx,1);
+  persistData();
+  const affected = applyChangeAndLog({
+    type:'recipe_item_remove', targetId:r.id, targetName:r.name,
+    field:`حذف ${ingredientById(ingredientId)?.name||''}`, oldValue:removed.qty, newValue:'-'
+  }, prevCosts);
+  showBanner(affected, r.name);
+  render();
+}
+
+function updateRecipeMeta(recipeId, field, value){
+  const r = recipeById(recipeId);
+  if(!r || r[field] === value) return;
+  const oldVal = r[field];
+  r[field] = value;
+  persistData();
+  applyChangeAndLog({
+    type:'recipe_meta', targetId:r.id, targetName:r.name,
+    field: field==='name' ? 'نام محصول' : 'دسته', oldValue: oldVal, newValue: value
+  }, allRecipeCosts());
+  render();
+}
+
+function createRecipe(name, category){
+  const r = { id: uid('rec'), name, category: category||'', items: [] };
+  STATE.recipes.push(r);
+  persistData();
+  applyChangeAndLog({ type:'recipe_add', targetId:r.id, targetName:name, field:'محصول جدید', oldValue:'-', newValue:'-' }, allRecipeCosts());
+  return r;
+}
+
+function deleteRecipe(recipeId){
+  const r = recipeById(recipeId);
+  if(!r) return;
+  STATE.recipes = STATE.recipes.filter(x=>x.id!==recipeId);
+  persistData();
+  applyChangeAndLog({ type:'recipe_delete', targetId:recipeId, targetName:r.name, field:'حذف محصول', oldValue:'-', newValue:'-' }, {});
+  UI.editModal = null;
+  render();
+}
+
+function revertLogEntry(logId){
+  const entry = STATE.log.find(l=>l.id===logId);
+  if(!entry) return;
+  if(entry.type === 'ingredient_rename'){
+    updateIngredientName(entry.targetId, entry.oldValue);
+  } else if(entry.type === 'ingredient_unit'){
+    const key = Object.keys(UNIT_LABEL).find(k=>UNIT_LABEL[k]===entry.oldValue);
+    if(key) updateIngredientUnit(entry.targetId, key);
+  } else if(entry.type === 'setting'){
+    updateSetting(entry.targetId, entry.oldValue, entry.targetName);
+  } else if(entry.type === 'recipe_qty'){
+    const r = recipeById(entry.targetId);
+    if(r){
+      const ingName = entry.field.replace('مقدار ','');
+      const ing = STATE.ingredients.find(i=>i.name===ingName);
+      if(ing) updateRecipeItemQty(r.id, ing.id, entry.oldValue);
+    }
+  } else {
+    alert('این نوع تغییر قابل بازگردانی خودکار نیست.');
+  }
+}
+</script>
+<script>
+function render(){
+  const root = document.getElementById('root');
+  if(!STATE.loaded){ root.innerHTML = `<div class="empty"><div class="big">⏳</div>در حال بارگذاری اطلاعات…</div>`; return; }
+  root.innerHTML = `
+    ${renderTopbar()}
+    ${renderBanner()}
+    ${renderTabs()}
+    <div>${renderTabContent()}</div>
+    ${UI.editModal ? renderModal() : ''}
+  `;
+  attachHandlers();
+}
+
+function reviewCount(){
+  let n = 0;
+  STATE.recipes.forEach(r => r.items.forEach(it => {
+    if(!it.isGarnish){
+      const ing = ingredientById(it.ingredientId);
+      if(!ing || ing.unitPrice === 0 || it.needsReview) n++;
+    }
+  }));
+  return n;
+}
+
+function renderTopbar(){
+  return `
+  <div class="topbar">
+    <div class="brand">
+      <h1>سامانه کنترل قیمت منو <span class="tag">SQLite</span></h1>
+      <p>محاسبه خودکار قیمت تمام آیتم‌ها بر اساس قیمت مواد اولیه؛ با ثبت لاگ تغییرات و امکان بازگردانی. مبالغ بر حسب <b>هزار تومان</b>.</p>
+    </div>
+    <div class="actions">
+      <button class="ghost" id="btn-reset">بازنشانی به داده اولیه</button>
+      <button class="primary" id="btn-export">⬇ خروجی اکسل</button>
+    </div>
+  </div>`;
+}
+
+function renderBanner(){
+  if(!UI.banner) return '';
+  const b = UI.banner;
+  if(b.type === 'info'){
+    return `<div class="banner"><div>${b.text}</div><button class="close" id="banner-close">✕</button></div>`;
+  }
+  const rows = b.affected.map(a => `<li><b>${a.recipeName}</b>: قیمت نهایی از <span class="chip-price-old">${price(a.oldPrice)}</span> به <span class="chip-price-new">${price(a.newPrice)}</span> تغییر کرد</li>`).join('');
+  return `<div class="banner warn">
+    <div style="flex:1">
+      <div>پس از تغییر «<b>${b.subject}</b>»، قیمت <b>${b.affected.length}</b> آیتم به‌روزرسانی شد:</div>
+      <ul>${rows}</ul>
+    </div>
+    <button class="close" id="banner-close">✕</button>
+  </div>`;
+}
+
+function renderTabs(){
+  const tabs = [
+    {id:'products', label:'محصولات', count: STATE.recipes.length},
+    {id:'ingredients', label:'مواد اولیه', count: STATE.ingredients.length},
+    {id:'settings', label:'تنظیمات فرمول'},
+    {id:'log', label:'لاگ تغییرات', count: STATE.log.length},
+  ];
+  return `<div class="tabs">${tabs.map(t => `
+    <div class="tab ${UI.tab===t.id?'active':''}" data-tab="${t.id}">
+      ${t.label}${t.count!==undefined ? `<span class="count">${fa(t.count)}</span>` : ''}
+    </div>`).join('')}</div>`;
+}
+
+function renderTabContent(){
+  if(UI.tab === 'products') return renderProducts();
+  if(UI.tab === 'ingredients') return renderIngredients();
+  if(UI.tab === 'settings') return renderSettings();
+  if(UI.tab === 'log') return renderLog();
+  return '';
+}
+
+// ================= PRODUCTS TAB =================
+function renderProducts(){
+  const rc = reviewCount();
+  const categories = [...new Set(STATE.recipes.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fa'));
+  return `
+  <div class="card pad">
+    <div class="toolbar">
+      <div><div class="section-title">محصولات (${fa(STATE.recipes.length)})</div>
+      <div class="section-sub">قیمت نهایی خودکار محاسبه می‌شود؛ می‌توانید محصولات را بر اساس دسته فیلتر کنید.</div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="search-box" style="margin:0"><input type="text" id="product-search" placeholder="جست‌وجوی محصول…" value="${UI.productSearch}"></div>
+        <select id="category-filter" class="category-filter"><option value="">همه دسته‌ها</option>${categories.map(c=>`<option value="${c}" ${UI.categoryFilter===c?'selected':''}>${c}</option>`).join('')}</select>
+        <button class="primary" id="btn-add-recipe">+ محصول جدید</button>
+      </div>
+    </div>
+    ${rc>0 ? `<div class="banner warn" style="margin-bottom:14px"><div>⚠ <b>${fa(rc)}</b> قلم مواد اولیه در محصولات، فاقد قیمت هستند یا نیاز به بررسی مقدار دارند.</div></div>` : ''}
+    <div id="products-list-wrapper">${renderProductsListOnly()}</div>
+  </div>`;
+}
+
+function renderProductsListOnly(){
+  const q = UI.productSearch.trim();
+  const list = STATE.recipes.filter(r => (!q || r.name.includes(q)) && (!UI.categoryFilter || r.category===UI.categoryFilter));
+  return `<div style="overflow-x:auto"><table><thead><tr><th>نام محصول</th><th>دسته</th><th>هزینه مواد</th><th>قیمت نهایی</th><th>وضعیت</th></tr></thead><tbody>
+    ${list.map(r=>{ const c=computeRecipeCost(r); const needsReview=r.items.some(it=>!it.isGarnish&&(it.needsReview||(ingredientById(it.ingredientId)?.unitPrice||0)===0)); return `<tr class="clickable" data-open-recipe="${r.id}"><td><b>${r.name}</b></td><td style="color:var(--ink-soft)">${r.category||'—'}</td><td class="num">${price(c.material)}</td><td class="num"><b>${price(c.finalPrice)}</b></td><td>${needsReview?'<span class="pill bad">نیاز به بررسی</span>':'<span class="pill ok">کامل</span>'}</td></tr>`; }).join('') || `<tr><td colspan="5" class="empty">موردی یافت نشد</td></tr>`}
+  </tbody></table></div>`;
+}
+
+function renderRecipeModal(recipeId){
+  const r = recipeById(recipeId);
+  const c = computeRecipeCost(r);
+  const s = STATE.settings;
+  const itemsHtml = r.items.map(it => {
+    const ing = ingredientById(it.ingredientId);
+    const noPrice = !it.isGarnish && ing && ing.unitPrice === 0;
+    return `<div class="item-row">
+      <div class="ing-name">${ing?ing.name:'?'} ${it.isGarnish?'<span class="pill neutral">تزئین</span>':''} ${it.needsReview?`<span class="badge-review">بررسی: ${it.qtyRawText||''}</span>`:''} ${noPrice?'<span class="badge-review">بدون قیمت</span>':''}</div>
+      <div class="qty-with-unit">
+        <input type="number" step="0.1" class="qty-input" data-recipe="${r.id}" data-ing="${it.ingredientId}" value="${it.qty}" ${it.isGarnish?'placeholder="—"':''}>
+        <span style="color:var(--ink-soft);font-size:12px;white-space:nowrap">${ing?UNIT_LABEL[ing.unit]:''}</span>
+      </div>
+      <div style="color:var(--ink-soft);font-size:12px">${ing?price((it.qty||0)*ing.unitPrice):'—'}</div>
+      <button class="subtle-btn" data-remove-item="${it.ingredientId}" data-recipe="${r.id}" title="حذف">✕</button>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="modal-head">
+    <input type="text" class="recipe-name-input" id="edit-recipe-name" data-recipe="${r.id}" value="${r.name}">
+    <button class="ghost" id="modal-close">✕ بستن</button>
+  </div>
+  <div class="modal-body">
+    <div class="field" style="margin-bottom:14px">
+      <label>دسته</label>
+      <input type="text" class="recipe-container-input" id="edit-recipe-category" data-recipe="${r.id}" value="${r.category||''}" style="width:100%" placeholder="مثلاً شیک، نوشیدنی سرد، غذا">
+    </div>
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">اجزای ترکیب</div>
+    <div>${itemsHtml || '<div class="footnote">قلمی ثبت نشده است.</div>'}</div>
+    <button class="ghost" id="btn-add-item" data-recipe="${r.id}" style="margin-top:6px">+ افزودن ماده اولیه</button>
+    <div class="summary-box">
+      <div class="summary-row"><span>هزینه خام مواد</span><span class="num">${price(c.material)}</span></div>
+      <div class="summary-row"><span>+ ضایعات (${fa(s.wasteRate*100)}٪)</span><span class="num">${price(c.material*s.wasteRate)}</span></div>
+      <div class="summary-row"><span>+ سربار</span><span class="num">${price(s.overheadCost)}</span></div>
+      <div class="summary-row"><span>+ بسته‌بندی</span><span class="num">${price(s.packagingCost)}</span></div>
+      <div class="summary-row"><span>+ سایر هزینه‌ها</span><span class="num">${price(s.otherCost)}</span></div>
+      <div class="summary-row"><span>× حاشیه سود (${fa(s.marginRate*100)}٪)</span><span></span></div>
+      <div class="summary-row total"><span>قیمت نهایی پیشنهادی</span><span class="num">${price(c.finalPrice)}</span></div>
+    </div>
+  </div>
+  <div class="modal-foot" style="justify-content:space-between">
+    <button class="danger" id="btn-delete-recipe" data-recipe="${r.id}">حذف محصول</button>
+    <button class="primary" id="modal-close2">تمام</button>
+  </div>`;
+}
+
+function renderAddRecipeModal(){
+  return `
+  <div class="modal-head"><h3>محصول جدید</h3><button class="ghost" id="modal-close">✕</button></div>
+  <div class="modal-body"><div class="grid2">
+    <div class="field"><label>نام محصول</label><input type="text" id="new-recipe-name" placeholder="مثلاً شیک انبه"></div>
+    <div class="field"><label>دسته</label><input type="text" id="new-recipe-category" placeholder="مثلاً شیک"></div>
+  </div></div>
+  <div class="modal-foot"><button class="ghost" id="modal-close">انصراف</button><button class="primary" id="btn-confirm-add-recipe">ایجاد و افزودن مواد</button></div>`;
+}
+
+function renderAddItemModal(recipeId){
+  const r=recipeById(recipeId); const used=new Set(r.items.map(i=>i.ingredientId));
+  const available=STATE.ingredients.filter(i=>!used.has(i.id)).sort((a,b)=>a.name.localeCompare(b.name,'fa'));
+  const options=available.map(i=>`<option value="${i.id}">${i.name} ${i.unitPrice?'('+fa(i.unitPrice)+' هزار ت/'+UNIT_LABEL[i.unit]+')':'(بدون قیمت)'}</option>`).join('');
+  return `
+  <div class="modal-head"><h3>افزودن ماده اولیه به «${r.name}»</h3><button class="ghost" id="modal-close">✕</button></div>
+  <div class="modal-body">
+    <div class="field"><label>جست‌وجوی ماده اولیه</label><input type="text" id="new-item-ing-search" placeholder="نام ماده را تایپ کنید…"></div>
+    <div class="grid2" style="margin-top:8px">
+      <div class="field"><label>ماده اولیه موجود</label><select id="new-item-ing" style="width:100%">${options}</select></div>
+      <div class="field"><label>مقدار مصرف در رسپی</label><input type="number" id="new-item-qty" value="1" step="0.1"></div>
+    </div>
+    <div class="field" style="margin-top:14px"><label>یا ماده اولیه جدید بساز</label>
+      <div class="grid2"><input type="text" id="new-ing-name" placeholder="نام ماده اولیه جدید"><select id="new-ing-unit"><option value="gram">گرم</option><option value="kg">کیلو</option><option value="count">عدد</option></select></div>
+      <div class="grid2" style="margin-top:8px"><input type="number" id="new-ing-purchase-price" placeholder="مبلغ خرید (هزار تومان)" step="0.01"><input type="number" id="new-ing-purchase-qty" placeholder="مقدار خرید، مثلاً 1000" step="0.01"></div>
+      <div class="hint">مثال: شیر ۱۰۰۰ گرمی با قیمت ۱۵۰ هزار تومان ⇒ قیمت هر گرم ۰٫۱۵ هزار تومان.</div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="ghost" id="modal-close">انصراف</button><button class="primary" id="btn-confirm-add-item" data-recipe="${r.id}">افزودن</button></div>`;
+}
+
+// ================= INGREDIENTS TAB =================
+function renderIngredients(){
+  const unpriced=STATE.ingredients.filter(i=>i.unitPrice===0).length;
+  return `<div class="card pad"><div class="toolbar"><div><div class="section-title">مواد اولیه (${fa(STATE.ingredients.length)})</div>
+  <div class="section-sub">مبلغ خرید و مقدار خرید را وارد کنید؛ قیمت واحد به‌صورت خودکار محاسبه می‌شود.</div></div>
+  <div style="display:flex;gap:8px;align-items:center"><div class="search-box" style="margin:0"><input type="text" id="ing-search" placeholder="جست‌وجوی ماده اولیه…" value="${UI.ingredientSearch}"></div><button class="primary" id="btn-add-ingredient">+ ماده اولیه جدید</button></div></div>
+  ${unpriced>0?`<div class="banner warn" style="margin-bottom:14px">⚠ <b>${fa(unpriced)}</b> ماده اولیه هنوز قیمت معتبر ندارد.</div>`:''}<div id="ingredients-list-wrapper">${renderIngredientsListOnly()}</div></div>`;
+}
+
+function renderIngredientsListOnly(){
+  const q=UI.ingredientSearch.trim(); let list=STATE.ingredients.filter(i=>!q||i.name.includes(q));
+  list=list.slice().sort((a,b)=>{if(a.unitPrice===0&&b.unitPrice!==0)return -1;if(b.unitPrice===0&&a.unitPrice!==0)return 1;return a.name.localeCompare(b.name,'fa')});
+  return `<div style="overflow-x:auto"><table><thead><tr><th>نام ماده اولیه</th><th>واحد</th><th>مبلغ خرید (هزار تومان)</th><th>مقدار خرید</th><th>قیمت هر واحد</th><th>در چند محصول</th><th></th></tr></thead><tbody>
+  ${list.map(i=>{const usedIn=recipesUsingIngredient(i.id).length; return `<tr><td><input type="text" class="inline-name-input name-input" data-ing="${i.id}" value="${i.name}">${i.unitPrice===0?'<span class="badge-review">بدون قیمت</span>':''}</td>
+  <td><select class="unit-select unit-select-ing" data-ing="${i.id}"><option value="gram" ${i.unit==='gram'?'selected':''}>گرم</option><option value="kg" ${i.unit==='kg'?'selected':''}>کیلو</option><option value="count" ${i.unit==='count'?'selected':''}>عدد</option></select></td>
+  <td><input type="number" class="purchase-price-input" data-ing="${i.id}" value="${i.purchasePrice||0}" step="0.01"></td><td><input type="number" class="purchase-qty-input" data-ing="${i.id}" value="${i.purchaseQty||0}" step="0.01"></td>
+  <td class="num"><b>${fa(i.unitPrice||0)}</b> هزار ت/${UNIT_LABEL[i.unit]}</td><td>${usedIn>0?`<button class="ghost" data-view-usage="${i.id}" style="font-size:12px;padding:5px 10px">${fa(usedIn)} محصول</button>`:'—'}</td><td><button class="icon-btn" data-delete-ing="${i.id}" title="حذف">🗑</button></td></tr>`}).join('')||`<tr><td colspan="7" class="empty">موردی یافت نشد</td></tr>`}
+  </tbody></table></div>`;
+}
+
+function renderAddIngredientModal(){
+  return `<div class="modal-head"><h3>ماده اولیه جدید</h3><button class="ghost" id="modal-close">✕</button></div><div class="modal-body">
+  <div class="grid2"><div class="field"><label>نام ماده اولیه</label><input type="text" id="add-ing-name" placeholder="مثلاً شیر"></div><div class="field"><label>واحد اندازه‌گیری</label><select id="add-ing-unit"><option value="gram">گرم</option><option value="kg">کیلو</option><option value="count">عدد</option></select></div></div>
+  <div class="grid2" style="margin-top:14px"><div class="field"><label>مبلغ خرید (هزار تومان)</label><input type="number" id="add-ing-purchase-price" step="0.01" value="0"></div><div class="field"><label>مقدار خرید</label><input type="number" id="add-ing-purchase-qty" step="0.01" value="0" placeholder="مثلاً 1000"></div></div>
+  <div class="hint" style="margin-top:8px">قیمت هر واحد = مبلغ خرید ÷ مقدار خرید. مثال: ۱۵۰ ÷ ۱۰۰۰ = ۰٫۱۵ هزار تومان برای هر گرم.</div></div>
+  <div class="modal-foot"><button class="ghost" id="modal-close">انصراف</button><button class="primary" id="btn-confirm-add-ingredient">افزودن</button></div>`;
+}
+
+function renderUsageModal(ingId){
+  const ing = ingredientById(ingId);
+  const recs = recipesUsingIngredient(ingId);
+  return `
+  <div class="modal-head"><h3>استفاده «${ing.name}» در محصولات</h3><button class="ghost" id="modal-close">✕</button></div>
+  <div class="modal-body">
+    <table><thead><tr><th>محصول</th><th>مقدار مصرفی</th><th>هزینه این ماده در محصول</th></tr></thead>
+    <tbody>
+    ${recs.map(r=>{
+      const it = r.items.find(i=>i.ingredientId===ingId);
+      return `<tr><td>${r.name}</td><td class="num">${fa(it.qty)} ${UNIT_LABEL[ing.unit]}</td><td class="num">${price(it.qty*ing.unitPrice)}</td></tr>`;
+    }).join('')}
+    </tbody></table>
+  </div>
+  <div class="modal-foot"><button class="primary" id="modal-close2">بستن</button></div>`;
+}
+
+// ================= SETTINGS TAB =================
+function renderSettings(){
+  const s = STATE.settings;
+  return `
+  <div class="card pad">
+    <div class="section-title">تنظیمات فرمول قیمت‌گذاری</div>
+    <div class="section-sub">این پارامترها روی قیمت نهاییِ همه محصولات اثر می‌گذارد (مبالغ بر حسب هزار تومان). فرمول: <br>
+    <code>قیمت نهایی = ((هزینه مواد × (۱+نرخ ضایعات)) + سربار + بسته‌بندی + سایر هزینه‌ها) × (۱+حاشیه سود)</code></div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="field"><label>نرخ ضایعات (٪)</label><input type="number" id="set-waste" value="${s.wasteRate*100}" step="0.5"></div>
+      <div class="field"><label>حاشیه سود (٪)</label><input type="number" id="set-margin" value="${s.marginRate*100}" step="1"></div>
+      <div class="field"><label>هزینه سربار (هزار تومان)</label><input type="number" id="set-overhead" value="${s.overheadCost}" step="1"></div>
+      <div class="field"><label>هزینه بسته‌بندی (هزار تومان)</label><input type="number" id="set-packaging" value="${s.packagingCost}" step="1"></div>
+      <div class="field"><label>سایر هزینه‌ها (هزار تومان)</label><input type="number" id="set-other" value="${s.otherCost}" step="1"></div>
+    </div>
+    <button class="primary" id="btn-apply-settings" style="margin-top:16px">اعمال و محاسبه مجدد همه محصولات</button>
+  </div>`;
+}
+
+// ================= LOG TAB =================
+function renderLog(){
+  if(STATE.log.length === 0){
+    return `<div class="card pad"><div class="empty"><div class="big">📋</div>هنوز هیچ تغییری ثبت نشده است.</div></div>`;
+  }
+  return `<div class="card pad">
+    <div class="section-title">لاگ تغییرات قیمت (${fa(STATE.log.length)})</div>
+    <div class="section-sub">هر تغییر قیمت، نام، واحد، مقدار مصرفی یا فرمول، همراه با مقدار قبل و بعد، در این‌جا ثبت می‌شود تا در صورت نیاز بتوانید آن را بازگردانی کنید.</div>
+    <div>
+    ${STATE.log.map(l => `
+      <div class="log-item">
+        <div class="log-head">
+          <div>
+            <b>${l.targetName}</b> — ${l.field} از
+            <span class="chip-price-old">${typeof l.oldValue==='number'?fa(l.oldValue):l.oldValue}</span>
+            <span class="arrow">←</span>
+            <span class="chip-price-new">${typeof l.newValue==='number'?fa(l.newValue):l.newValue}</span>
+            تغییر کرد
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="log-meta">${l.tsLabel}</span>
+            ${['ingredient_rename','ingredient_unit','setting','recipe_qty'].includes(l.type) ? `<button class="ghost" data-revert="${l.id}" style="font-size:12px;padding:5px 10px">بازگردانی</button>`:''}
+          </div>
+        </div>
+        ${l.affected && l.affected.length>0 ? `
+        <div class="log-affected">
+          ${l.affected.length} محصول تحت تاثیر: ${l.affected.map(a=>`<b>${a.recipeName}</b> (<span class="chip-price-old">${price(a.oldPrice)}</span> ← <span class="chip-price-new">${price(a.newPrice)}</span>)`).join('، ')}
+        </div>`:''}
+      </div>
+    `).join('')}
+    </div>
+  </div>`;
+}
+
+function renderModal(){
+  const m = UI.editModal;
+  let inner = '';
+  if(m.type === 'recipe') inner = renderRecipeModal(m.id);
+  if(m.type === 'add-item') inner = renderAddItemModal(m.id);
+  if(m.type === 'add-recipe') inner = renderAddRecipeModal();
+  if(m.type === 'add-ingredient') inner = renderAddIngredientModal();
+  if(m.type === 'usage') inner = renderUsageModal(m.id);
+  return `<div class="modal-bg" id="modal-bg"><div class="modal">${inner}</div></div>`;
+}
+</script>
+<script>
+function attachHandlers(){
+  document.querySelectorAll('.tab').forEach(el=>{
+    el.onclick = ()=>{ UI.tab = el.dataset.tab; UI.banner=null; render(); };
+  });
+
+  const bc = document.getElementById('banner-close');
+  if(bc) bc.onclick = ()=>{ UI.banner=null; render(); };
+
+  const resetBtn = document.getElementById('btn-reset');
+  if(resetBtn) resetBtn.onclick = async ()=>{
+    if(!confirm('همه داده‌ها (مواد اولیه، محصولات، تنظیمات) به حالت اولیه بازمی‌گردد و لاگ تغییرات پاک می‌شود. ادامه می‌دهید؟')) return;
+    STATE.ingredients = JSON.parse(JSON.stringify(SEED_DATA.ingredients));
+    STATE.recipes = JSON.parse(JSON.stringify(SEED_DATA.recipes));
+    STATE.settings = JSON.parse(JSON.stringify(SEED_DATA.settings));
+    STATE.log = [];
+    await persistData();
+    await persistLog();
+    UI.banner = null;
+    render();
+  };
+
+  const exportBtn = document.getElementById('btn-export');
+  if(exportBtn) exportBtn.onclick = exportExcel;
+
+  // ---------- products tab ----------
+  wireSearchInput('product-search', 'products-list-wrapper', v=>{ UI.productSearch = v; }, renderProductsListOnly, ()=>attachProductsListHandlers());
+  attachProductsListHandlers();
+  const catFilter=document.getElementById('category-filter');
+  if(catFilter) catFilter.onchange=()=>{ UI.categoryFilter=catFilter.value; const w=document.getElementById('products-list-wrapper'); if(w){w.innerHTML=renderProductsListOnly(); attachProductsListHandlers();} };
+
+  const addRecipeBtn = document.getElementById('btn-add-recipe');
+  if(addRecipeBtn) addRecipeBtn.onclick = ()=>{ UI.editModal = {type:'add-recipe'}; render(); };
+
+  // ---------- ingredients tab ----------
+  wireSearchInput('ing-search', 'ingredients-list-wrapper', v=>{ UI.ingredientSearch = v; }, renderIngredientsListOnly, ()=>attachIngredientsListHandlers());
+  attachIngredientsListHandlers();
+
+  const addIngBtn = document.getElementById('btn-add-ingredient');
+  if(addIngBtn) addIngBtn.onclick = ()=>{ UI.editModal = {type:'add-ingredient'}; render(); };
+
+  // ---------- settings tab ----------
+  const applyBtn = document.getElementById('btn-apply-settings');
+  if(applyBtn) applyBtn.onclick = ()=>{
+    const waste = parseFloat(document.getElementById('set-waste').value)/100;
+    const margin = parseFloat(document.getElementById('set-margin').value)/100;
+    const overhead = parseFloat(document.getElementById('set-overhead').value);
+    const packaging = parseFloat(document.getElementById('set-packaging').value);
+    const other = parseFloat(document.getElementById('set-other').value);
+    if(waste !== STATE.settings.wasteRate) updateSetting('wasteRate', waste, 'نرخ ضایعات');
+    if(margin !== STATE.settings.marginRate) updateSetting('marginRate', margin, 'حاشیه سود');
+    if(overhead !== STATE.settings.overheadCost) updateSetting('overheadCost', overhead, 'هزینه سربار');
+    if(packaging !== STATE.settings.packagingCost) updateSetting('packagingCost', packaging, 'هزینه بسته‌بندی');
+    if(other !== STATE.settings.otherCost) updateSetting('otherCost', other, 'سایر هزینه‌ها');
+  };
+
+  // ---------- log tab ----------
+  document.querySelectorAll('[data-revert]').forEach(el=>{
+    el.onclick = ()=>{ if(confirm('این تغییر بازگردانی شود؟')) revertLogEntry(el.dataset.revert); };
+  });
+
+  // ---------- modal ----------
+  const bg = document.getElementById('modal-bg');
+  if(bg){ bg.onclick = (e)=>{ if(e.target.id === 'modal-bg'){ UI.editModal=null; render(); } }; }
+  ['modal-close','modal-close2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.onclick = ()=>{ UI.editModal=null; render(); };
+  });
+
+  // recipe modal specific
+  document.querySelectorAll('.qty-input').forEach(el=>{
+    el.onchange = ()=>{ const v = parseFloat(el.value)||0; updateRecipeItemQty(el.dataset.recipe, el.dataset.ing, v); };
+  });
+  document.querySelectorAll('[data-remove-item]').forEach(el=>{
+    el.onclick = ()=>{ if(confirm('این ماده اولیه از ترکیب حذف شود؟')) removeIngredientFromRecipe(el.dataset.recipe, el.dataset.removeItem); };
+  });
+  const addItemBtn = document.getElementById('btn-add-item');
+  if(addItemBtn) addItemBtn.onclick = ()=>{ UI.editModal = {type:'add-item', id: addItemBtn.dataset.recipe}; render(); };
+  const ingSearch=document.getElementById('new-item-ing-search');
+  if(ingSearch){ ingSearch.oninput=()=>{ const q=ingSearch.value.trim(); const sel=document.getElementById('new-item-ing'); const r=recipeById(UI.editModal.id); const used=new Set(r.items.map(i=>i.ingredientId)); const arr=STATE.ingredients.filter(i=>!used.has(i.id)&&(!q||i.name.includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'fa')); sel.innerHTML=arr.map(i=>`<option value="${i.id}">${i.name} ${i.unitPrice?'('+fa(i.unitPrice)+' هزار ت/'+UNIT_LABEL[i.unit]+')':'(بدون قیمت)'}</option>`).join(''); }; }
+  const confirmAdd = document.getElementById('btn-confirm-add-item');
+  if(confirmAdd) confirmAdd.onclick = ()=>{
+    const recipeId = confirmAdd.dataset.recipe;
+    const newName = document.getElementById('new-ing-name').value.trim();
+    const newPurchasePrice = parseFloat(document.getElementById('new-ing-purchase-price').value) || 0;
+    const newPurchaseQty = parseFloat(document.getElementById('new-ing-purchase-qty').value) || 0;
+    const newUnit = document.getElementById('new-ing-unit').value;
+    const qty = parseFloat(document.getElementById('new-item-qty').value) || 0;
+    let ingId;
+    if(newName){
+      const created = createIngredient(newName, newPurchasePrice, newPurchaseQty, newUnit);
+      ingId = created.id;
+    } else {
+      ingId = document.getElementById('new-item-ing').value;
+    }
+    if(!ingId){ alert('ماده اولیه را انتخاب کنید یا نام جدید وارد کنید.'); return; }
+    addIngredientToRecipe(recipeId, ingId, qty);
+  };
+  const editRecipeName = document.getElementById('edit-recipe-name');
+  if(editRecipeName) editRecipeName.onchange = ()=>{ updateRecipeMeta(editRecipeName.dataset.recipe, 'name', editRecipeName.value.trim()); };
+  const editRecipeCategory = document.getElementById('edit-recipe-category');
+  if(editRecipeCategory) editRecipeCategory.onchange = ()=>{ updateRecipeMeta(editRecipeCategory.dataset.recipe, 'category', editRecipeCategory.value.trim()); };
+  const deleteRecipeBtn = document.getElementById('btn-delete-recipe');
+  if(deleteRecipeBtn) deleteRecipeBtn.onclick = ()=>{
+    if(confirm('این محصول برای همیشه حذف شود؟')){
+      deleteRecipe(deleteRecipeBtn.dataset.recipe);
+    }
+  };
+
+  // add-recipe modal
+  const confirmAddRecipe = document.getElementById('btn-confirm-add-recipe');
+  if(confirmAddRecipe) confirmAddRecipe.onclick = ()=>{
+    const name = document.getElementById('new-recipe-name').value.trim();
+    if(!name){ alert('نام محصول را وارد کنید.'); return; }
+    const category = document.getElementById('new-recipe-category').value.trim();
+    const r = createRecipe(name, category);
+    UI.editModal = { type:'recipe', id: r.id };
+    render();
+  };
+
+  // add-ingredient modal
+  const confirmAddIng = document.getElementById('btn-confirm-add-ingredient');
+  if(confirmAddIng) confirmAddIng.onclick = ()=>{
+    const name = document.getElementById('add-ing-name').value.trim();
+    if(!name){ alert('نام ماده اولیه را وارد کنید.'); return; }
+    const purchasePrice = parseFloat(document.getElementById('add-ing-purchase-price').value) || 0;
+    const purchaseQty = parseFloat(document.getElementById('add-ing-purchase-qty').value) || 0;
+    const unit = document.getElementById('add-ing-unit').value;
+    createIngredient(name, purchasePrice, purchaseQty, unit);
+    UI.editModal = null;
+    render();
+  };
+
+  // usage modal — nothing extra to wire
+}
+
+function attachProductsListHandlers(){
+  document.querySelectorAll('[data-open-recipe]').forEach(el=>{
+    el.onclick = ()=>{ UI.editModal = {type:'recipe', id: el.dataset.openRecipe}; render(); };
+  });
+}
+
+function attachIngredientsListHandlers(){
+  document.querySelectorAll('.purchase-price-input,.purchase-qty-input').forEach(el=>{
+    el.onchange=()=>{ const id=el.dataset.ing; const p=document.querySelector(`.purchase-price-input[data-ing="${id}"]`); const q=document.querySelector(`.purchase-qty-input[data-ing="${id}"]`); updateIngredientPurchase(id, parseFloat(p.value)||0, parseFloat(q.value)||0); };
+  });
+  document.querySelectorAll('.name-input').forEach(el=>{
+    el.onchange = ()=>{ const v = el.value.trim(); if(v) updateIngredientName(el.dataset.ing, v); else el.value = ingredientById(el.dataset.ing).name; };
+  });
+  document.querySelectorAll('.unit-select-ing').forEach(el=>{
+    el.onchange = ()=>{ updateIngredientUnit(el.dataset.ing, el.value); };
+  });
+  document.querySelectorAll('[data-view-usage]').forEach(el=>{
+    el.onclick = ()=>{ UI.editModal = {type:'usage', id: el.dataset.viewUsage}; render(); };
+  });
+  document.querySelectorAll('[data-delete-ing]').forEach(el=>{
+    el.onclick = ()=>{
+      const id = el.dataset.deleteIng;
+      const ing = ingredientById(id);
+      const usedIn = recipesUsingIngredient(id);
+      const msg = usedIn.length>0
+        ? `«${ing.name}» در ${usedIn.length} محصول استفاده شده. با حذف آن، از ترکیب همه آن محصولات هم حذف می‌شود. ادامه می‌دهید؟`
+        : `ماده اولیه «${ing.name}» حذف شود؟`;
+      if(confirm(msg)) deleteIngredient(id);
+    };
+  });
+}
+
+// Generic helper: wires a search input so that typing only re-renders
+// a scoped wrapper element (not the whole page), preserving focus & caret.
+function wireSearchInput(inputId, wrapperId, setStateFn, renderListFn, reattachFn){
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  input.oninput = (e)=>{
+    setStateFn(e.target.value);
+    const wrapper = document.getElementById(wrapperId);
+    const caret = e.target.selectionStart;
+    wrapper.innerHTML = renderListFn();
+    reattachFn();
+    // input node itself was untouched, just restore caret in case browser normalized it
+    e.target.focus();
+    e.target.setSelectionRange(caret, caret);
+  };
+}
+
+// ---------- EXPORT TO EXCEL ----------
+function exportExcel(){
+  const wb = XLSX.utils.book_new();
+
+  const ingRows = [['نام ماده اولیه','واحد','مبلغ خرید (هزار تومان)','مقدار خرید','قیمت هر واحد (هزار تومان)','تعداد محصولات مصرف‌کننده']];
+  STATE.ingredients.slice().sort((a,b)=>a.name.localeCompare(b.name,'fa')).forEach(i=>{
+    ingRows.push([i.name, UNIT_LABEL[i.unit], i.purchasePrice||0, i.purchaseQty||0, i.unitPrice, recipesUsingIngredient(i.id).length]);
+  });
+  const ws1 = XLSX.utils.aoa_to_sheet(ingRows);
+  ws1['!cols'] = [{wch:28},{wch:10},{wch:20},{wch:15},{wch:22},{wch:22}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'مواد اولیه');
+
+  const recRows = [['نام محصول','دسته','هزینه مواد (هزار تومان)','قیمت نهایی (هزار تومان)','وضعیت']];
+  STATE.recipes.forEach(r=>{
+    const c = computeRecipeCost(r);
+    const needsReview = r.items.some(it=>!it.isGarnish && (it.needsReview || (ingredientById(it.ingredientId)?.unitPrice||0)===0));
+    recRows.push([r.name, r.category||'', Math.round(c.material), Math.round(c.finalPrice), needsReview?'نیاز به بررسی':'کامل']);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(recRows);
+  ws2['!cols'] = [{wch:26},{wch:18},{wch:20},{wch:20},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'محصولات');
+
+  const detRows = [['نام محصول','ماده اولیه','مقدار مصرفی','واحد','قیمت واحد (هزار تومان)','هزینه این قلم (هزار تومان)','تزئین؟']];
+  STATE.recipes.forEach(r=>{
+    r.items.forEach(it=>{
+      const ing = ingredientById(it.ingredientId);
+      detRows.push([r.name, ing?ing.name:'?', it.qty, ing?UNIT_LABEL[ing.unit]:'', ing?ing.unitPrice:0, (it.qty||0)*(ing?ing.unitPrice:0), it.isGarnish?'بله':'خیر']);
+    });
+  });
+  const ws3 = XLSX.utils.aoa_to_sheet(detRows);
+  ws3['!cols'] = [{wch:24},{wch:22},{wch:12},{wch:8},{wch:18},{wch:20},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws3, 'جزئیات ترکیب');
+
+  const s = STATE.settings;
+  const setRows = [
+    ['پارامتر','مقدار'],
+    ['نرخ ضایعات (٪)', s.wasteRate*100],
+    ['حاشیه سود (٪)', s.marginRate*100],
+    ['هزینه سربار (هزار تومان)', s.overheadCost],
+    ['هزینه بسته‌بندی (هزار تومان)', s.packagingCost],
+    ['سایر هزینه‌ها (هزار تومان)', s.otherCost],
+  ];
+  const ws4 = XLSX.utils.aoa_to_sheet(setRows);
+  ws4['!cols'] = [{wch:26},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws4, 'تنظیمات فرمول');
+
+  const logRows = [['تاریخ','نوع تغییر','هدف','فیلد','مقدار قبلی','مقدار جدید','تعداد محصول متاثر']];
+  STATE.log.forEach(l=>{
+    logRows.push([l.tsLabel, l.type, l.targetName, l.field, l.oldValue, l.newValue, (l.affected||[]).length]);
+  });
+  const ws5 = XLSX.utils.aoa_to_sheet(logRows);
+  ws5['!cols'] = [{wch:20},{wch:16},{wch:22},{wch:22},{wch:14},{wch:14},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws5, 'لاگ تغییرات');
+
+  const dateTag = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `قیمت‌گذاری-منو-${dateTag}.xlsx`);
+}
+
+loadState();
+</script>
+</body>
+</html>
