@@ -155,6 +155,12 @@ select:focus{outline:2px solid var(--plum-soft);border-color:var(--plum)}
 .search-box{margin-bottom:12px}
 .search-box input{max-width:280px}
 .category-filter{min-width:160px}
+.difficulty-badge{display:inline-flex;align-items:center;gap:5px;background:var(--plum-soft);color:var(--plum);border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700}
+.difficulty-select{min-width:120px}
+.category-difficulty-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.category-difficulty-row{display:grid;grid-template-columns:1fr 150px;gap:12px;align-items:center;padding:10px 12px;background:var(--surface-2);border-radius:8px}
+@media(max-width:720px){.category-difficulty-row{grid-template-columns:1fr}}
+
 .purchase-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:720px){.purchase-grid{grid-template-columns:1fr}}
 .toolbar{position:sticky;top:45px; background: white;padding-top: 5px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
@@ -203,10 +209,14 @@ async function loadState(){
       STATE.ingredients = dataRes.ingredients || [];
       STATE.recipes = dataRes.recipes || [];
       STATE.settings = dataRes.settings || {};
+      if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
+      if(STATE.settings.difficultyStepRate === undefined) STATE.settings.difficultyStepRate = 0.10;
     } else {
       STATE.ingredients = JSON.parse(JSON.stringify(SEED_DATA.ingredients));
       STATE.recipes = JSON.parse(JSON.stringify(SEED_DATA.recipes));
       STATE.settings = JSON.parse(JSON.stringify(SEED_DATA.settings));
+      STATE.settings.categoryDifficulty = {};
+      STATE.settings.difficultyStepRate = 0.10;
       await persistData();
     }
     // migrate older records defensively
@@ -218,6 +228,17 @@ async function loadState(){
     STATE.recipes.forEach(r=>{
       if(r.category === undefined) r.category = r.container || '';
       delete r.container;
+      if(r.difficultyOverride !== undefined && r.difficultyOverride !== null){
+        r.difficultyOverride = Math.max(1, Math.min(5, Number(r.difficultyOverride)||1));
+      }
+    });
+    if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
+    if(STATE.settings.difficultyStepRate === undefined) STATE.settings.difficultyStepRate = 0.10;
+    // Every known category starts at difficulty 1 unless it already has a saved value.
+    STATE.recipes.forEach(r=>{
+      if(r.category && STATE.settings.categoryDifficulty[r.category] === undefined){
+        STATE.settings.categoryDifficulty[r.category] = 1;
+      }
     });
     STATE.log = logRes || [];
     await persistData();
@@ -226,6 +247,8 @@ async function loadState(){
     STATE.ingredients = JSON.parse(JSON.stringify(SEED_DATA.ingredients));
     STATE.recipes = JSON.parse(JSON.stringify(SEED_DATA.recipes));
     STATE.settings = JSON.parse(JSON.stringify(SEED_DATA.settings));
+    STATE.settings.categoryDifficulty = {};
+    STATE.settings.difficultyStepRate = 0.10;
     STATE.log = [];
   }
   STATE.loaded = true;
@@ -258,6 +281,31 @@ async function persistLog(){ await safeSet(LOG_KEY, STATE.log); }
 function ingredientById(id){ return STATE.ingredients.find(i=>i.id===id); }
 function recipeById(id){ return STATE.recipes.find(r=>r.id===id); }
 
+function getCategoryDifficulty(category){
+  if(!category) return 1;
+  const map = STATE.settings.categoryDifficulty || {};
+  const v = Number(map[category]);
+  return v >= 1 && v <= 5 ? v : 1;
+}
+
+function getRecipeDifficulty(recipe){
+  if(recipe && recipe.difficultyOverride !== undefined && recipe.difficultyOverride !== null){
+    const v = Number(recipe.difficultyOverride);
+    if(v >= 1 && v <= 5) return v;
+  }
+  return getCategoryDifficulty(recipe ? recipe.category : '');
+}
+
+function difficultyMultiplier(level){
+  // Difficulty 1..5 => 0%, 10%, 20%, 30%, 40% increase.
+  const step = Number(STATE.settings.difficultyStepRate);
+  return 1 + (Math.max(1, Math.min(5, Number(level)||1)) - 1) * (Number.isFinite(step) ? step : 0.10);
+}
+
+function difficultyLabel(level){
+  return `سختی ${fa(level)}`;
+}
+
 function computeRecipeCost(recipe){
   let material = 0;
   for(const it of recipe.items){
@@ -267,8 +315,12 @@ function computeRecipeCost(recipe){
     material += (it.qty||0) * p;
   }
   const s = STATE.settings;
-  const finalPrice = ((material * (1+s.wasteRate)) + s.overheadCost + s.packagingCost + s.otherCost) * (1+s.marginRate);
-  return { material, finalPrice };
+  const difficulty = getRecipeDifficulty(recipe);
+  const difficultyMult = difficultyMultiplier(difficulty);
+  const baseBeforeMargin = ((material * (1+s.wasteRate)) + s.overheadCost + s.packagingCost + s.otherCost);
+  const adjustedBase = baseBeforeMargin * difficultyMult;
+  const finalPrice = adjustedBase * (1+s.marginRate);
+  return { material, difficulty, difficultyMult, baseBeforeMargin, adjustedBase, finalPrice };
 }
 
 function allRecipeCosts(){
@@ -392,6 +444,47 @@ function updateSetting(key, newVal, label){
   render();
 }
 
+function updateCategoryDifficulty(category, newLevel){
+  category = (category || '').trim();
+  if(!category) return;
+  newLevel = Math.max(1, Math.min(5, Number(newLevel)||1));
+  if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
+  const oldLevel = getCategoryDifficulty(category);
+  if(oldLevel === newLevel && STATE.settings.categoryDifficulty[category] !== undefined) return;
+  const prevCosts = allRecipeCosts();
+  STATE.settings.categoryDifficulty[category] = newLevel;
+  persistData();
+  const affected = applyChangeAndLog({
+    type:'category_difficulty', targetId:category, targetName:category,
+    field:'سختی تهیه دسته', oldValue:oldLevel, newValue:newLevel
+  }, prevCosts);
+  showBanner(affected, `سختی تهیه دسته «${category}»`);
+  render();
+}
+
+function updateRecipeDifficulty(recipeId, value){
+  const r = recipeById(recipeId);
+  if(!r) return;
+  const prevCosts = allRecipeCosts();
+  const oldValue = (r.difficultyOverride === undefined || r.difficultyOverride === null) ? 'دسته' : r.difficultyOverride;
+  if(value === '' || value === 'inherit' || value === null){
+    if(r.difficultyOverride === undefined || r.difficultyOverride === null) return;
+    delete r.difficultyOverride;
+  } else {
+    const v = Math.max(1, Math.min(5, Number(value)||1));
+    if(r.difficultyOverride === v) return;
+    r.difficultyOverride = v;
+  }
+  persistData();
+  const newValue = (r.difficultyOverride === undefined || r.difficultyOverride === null) ? 'دسته' : r.difficultyOverride;
+  const affected = applyChangeAndLog({
+    type:'recipe_difficulty', targetId:r.id, targetName:r.name,
+    field:'سختی تهیه محصول', oldValue, newValue
+  }, prevCosts);
+  showBanner(affected, r.name);
+  render();
+}
+
 // ---------- recipe mutations ----------
 function updateRecipeItemQty(recipeId, ingredientId, newQty){
   const r = recipeById(recipeId);
@@ -446,17 +539,27 @@ function updateRecipeMeta(recipeId, field, value){
   const r = recipeById(recipeId);
   if(!r || r[field] === value) return;
   const oldVal = r[field];
+  const prevCosts = allRecipeCosts();
   r[field] = value;
+  if(field === 'category' && value){
+    if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
+    if(STATE.settings.categoryDifficulty[value] === undefined) STATE.settings.categoryDifficulty[value] = 1;
+  }
   persistData();
-  applyChangeAndLog({
+  const affected = applyChangeAndLog({
     type:'recipe_meta', targetId:r.id, targetName:r.name,
     field: field==='name' ? 'نام محصول' : 'دسته', oldValue: oldVal, newValue: value
-  }, allRecipeCosts());
+  }, prevCosts);
+  showBanner(affected, r.name);
   render();
 }
 
 function createRecipe(name, category){
   const r = { id: uid('rec'), name, category: category||'', items: [] };
+  if(r.category){
+    if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
+    if(STATE.settings.categoryDifficulty[r.category] === undefined) STATE.settings.categoryDifficulty[r.category] = 1;
+  }
   STATE.recipes.push(r);
   persistData();
   applyChangeAndLog({ type:'recipe_add', targetId:r.id, targetName:name, field:'محصول جدید', oldValue:'-', newValue:'-' }, allRecipeCosts());
@@ -483,6 +586,11 @@ function revertLogEntry(logId){
     if(key) updateIngredientUnit(entry.targetId, key);
   } else if(entry.type === 'setting'){
     updateSetting(entry.targetId, entry.oldValue, entry.targetName);
+  } else if(entry.type === 'category_difficulty'){
+    updateCategoryDifficulty(entry.targetId, entry.oldValue);
+  } else if(entry.type === 'recipe_difficulty'){
+    if(entry.oldValue === 'دسته') updateRecipeDifficulty(entry.targetId, 'inherit');
+    else updateRecipeDifficulty(entry.targetId, entry.oldValue);
   } else if(entry.type === 'recipe_qty'){
     const r = recipeById(entry.targetId);
     if(r){
@@ -627,6 +735,21 @@ function renderRecipeModal(recipeId){
       <label>دسته</label>
       <input type="text" class="recipe-container-input" id="edit-recipe-category" data-recipe="${r.id}" value="${r.category||''}" style="width:100%" placeholder="مثلاً شیک، نوشیدنی سرد، غذا">
     </div>
+    <div class="grid2" style="margin-bottom:14px">
+      <div class="field">
+        <label>سختی تهیه</label>
+        <select id="edit-recipe-difficulty" class="difficulty-select" data-recipe="${r.id}">
+          <option value="inherit" ${r.difficultyOverride===undefined||r.difficultyOverride===null?'selected':''}>از دسته (${fa(getCategoryDifficulty(r.category))})</option>
+          ${[1,2,3,4,5].map(v=>`<option value="${v}" ${Number(r.difficultyOverride)===v?'selected':''}>سختی ${fa(v)}</option>`).join('')}
+        </select>
+        <div class="hint">اگر جداگانه تعیین کنید، این محصول از سختی دسته مستقل می‌شود.</div>
+      </div>
+      <div class="field">
+        <label>ضریب فعلی</label>
+        <div class="difficulty-badge" style="margin-top:5px">${fa(difficultyMultiplier(getRecipeDifficulty(r)))}× — ${fa((difficultyMultiplier(getRecipeDifficulty(r))-1)*100)}٪</div>
+        <div class="hint">۱ = بدون افزایش، ۵ = ${fa((difficultyMultiplier(5)-1)*100)}٪ افزایش</div>
+      </div>
+    </div>
     <div class="section-title" style="font-size:13px;margin-bottom:8px">اجزای ترکیب</div>
     <div>${itemsHtml || '<div class="footnote">قلمی ثبت نشده است.</div>'}</div>
     <button class="ghost" id="btn-add-item" data-recipe="${r.id}" style="margin-top:6px">+ افزودن ماده اولیه</button>
@@ -636,6 +759,7 @@ function renderRecipeModal(recipeId){
       <div class="summary-row"><span>+ سربار</span><span class="num">${price(s.overheadCost)}</span></div>
       <div class="summary-row"><span>+ بسته‌بندی</span><span class="num">${price(s.packagingCost)}</span></div>
       <div class="summary-row"><span>+ سایر هزینه‌ها</span><span class="num">${price(s.otherCost)}</span></div>
+      <div class="summary-row"><span>× سختی تهیه (${difficultyLabel(c.difficulty)} / ${fa((c.difficultyMult-1)*100)}٪)</span><span class="num">${price(c.baseBeforeMargin*(c.difficultyMult-1))}</span></div>
       <div class="summary-row"><span>× حاشیه سود (${fa(s.marginRate*100)}٪)</span><span></span></div>
       <div class="summary-row total"><span>قیمت نهایی پیشنهادی</span><span class="num">${price(c.finalPrice)}</span></div>
     </div>
@@ -725,17 +849,35 @@ function renderUsageModal(ingId){
 // ================= SETTINGS TAB =================
 function renderSettings(){
   const s = STATE.settings;
+  const categories = [...new Set(STATE.recipes.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fa'));
+  const map = s.categoryDifficulty || {};
   return `
   <div class="card pad">
     <div class="section-title">تنظیمات فرمول قیمت‌گذاری</div>
-    <div class="section-sub">این پارامترها روی قیمت نهاییِ همه محصولات اثر می‌گذارد (مبالغ بر حسب هزار تومان). فرمول: <br>
-    <code>قیمت نهایی = ((هزینه مواد × (۱+نرخ ضایعات)) + سربار + بسته‌بندی + سایر هزینه‌ها) × (۱+حاشیه سود)</code></div>
+    <div class="section-sub">پارامترهای عمومی روی همه محصولات اثر می‌گذارند. سختی تهیه دسته نیز به‌صورت همگانی روی محصولات همان دسته اعمال می‌شود، مگر محصول سختی اختصاصی داشته باشد.</div>
     <div class="grid2" style="margin-top:16px">
       <div class="field"><label>نرخ ضایعات (٪)</label><input type="number" id="set-waste" value="${s.wasteRate*100}" step="0.5"></div>
       <div class="field"><label>حاشیه سود (٪)</label><input type="number" id="set-margin" value="${s.marginRate*100}" step="1"></div>
       <div class="field"><label>هزینه سربار (هزار تومان)</label><input type="number" id="set-overhead" value="${s.overheadCost}" step="1"></div>
       <div class="field"><label>هزینه بسته‌بندی (هزار تومان)</label><input type="number" id="set-packaging" value="${s.packagingCost}" step="1"></div>
       <div class="field"><label>سایر هزینه‌ها (هزار تومان)</label><input type="number" id="set-other" value="${s.otherCost}" step="1"></div>
+      <div class="field"><label>افزایش قیمت هر سطح سختی (٪)</label><input type="number" id="set-difficulty-step" value="${s.difficultyStepRate*100}" step="1" min="0"></div>
+    </div>
+    <div class="banner" style="margin-top:16px;margin-bottom:0">
+      <div><b>منطق سختی:</b> سختی ۱ = ۰٪ افزایش، سختی ۲ = یک سطح افزایش، ... سختی ۵ = چهار سطح افزایش. مقدار هر سطح از گزینه بالا تعیین می‌شود.</div>
+    </div>
+    <div style="margin-top:22px">
+      <div class="section-title">سختی تهیه به تفکیک دسته‌بندی</div>
+      <div class="section-sub">با تغییر این عدد، همه محصولات آن دسته که سختی اختصاصی ندارند همان لحظه دوباره قیمت‌گذاری می‌شوند.</div>
+      <div class="category-difficulty-list">
+        ${categories.length ? categories.map(cat=>`
+          <div class="category-difficulty-row">
+            <div><b>${cat}</b><div class="hint">سختی فعلی: ${fa(getCategoryDifficulty(cat))}</div></div>
+            <select class="category-difficulty-select" data-category="${cat}">
+              ${[1,2,3,4,5].map(v=>`<option value="${v}" ${getCategoryDifficulty(cat)===v?'selected':''}>سختی ${fa(v)}</option>`).join('')}
+            </select>
+          </div>`).join('') : '<div class="footnote">هنوز هیچ دسته‌بندی برای محصولات ثبت نشده است.</div>'}
+      </div>
     </div>
     <button class="primary" id="btn-apply-settings" style="margin-top:16px">اعمال و محاسبه مجدد همه محصولات</button>
   </div>`;
@@ -801,6 +943,8 @@ function attachHandlers(){
     STATE.ingredients = JSON.parse(JSON.stringify(SEED_DATA.ingredients));
     STATE.recipes = JSON.parse(JSON.stringify(SEED_DATA.recipes));
     STATE.settings = JSON.parse(JSON.stringify(SEED_DATA.settings));
+    STATE.settings.categoryDifficulty = {};
+    STATE.settings.difficultyStepRate = 0.10;
     STATE.log = [];
     await persistData();
     await persistLog();
@@ -835,12 +979,17 @@ function attachHandlers(){
     const overhead = parseFloat(document.getElementById('set-overhead').value);
     const packaging = parseFloat(document.getElementById('set-packaging').value);
     const other = parseFloat(document.getElementById('set-other').value);
+    const difficultyStep = parseFloat(document.getElementById('set-difficulty-step').value)/100;
     if(waste !== STATE.settings.wasteRate) updateSetting('wasteRate', waste, 'نرخ ضایعات');
     if(margin !== STATE.settings.marginRate) updateSetting('marginRate', margin, 'حاشیه سود');
     if(overhead !== STATE.settings.overheadCost) updateSetting('overheadCost', overhead, 'هزینه سربار');
     if(packaging !== STATE.settings.packagingCost) updateSetting('packagingCost', packaging, 'هزینه بسته‌بندی');
     if(other !== STATE.settings.otherCost) updateSetting('otherCost', other, 'سایر هزینه‌ها');
+    if(difficultyStep !== STATE.settings.difficultyStepRate) updateSetting('difficultyStepRate', difficultyStep, 'افزایش قیمت هر سطح سختی');
   };
+  document.querySelectorAll('.category-difficulty-select').forEach(el=>{
+    el.onchange = ()=> updateCategoryDifficulty(el.dataset.category, el.value);
+  });
 
   // ---------- log tab ----------
   document.querySelectorAll('[data-revert]').forEach(el=>{
@@ -888,6 +1037,8 @@ function attachHandlers(){
   if(editRecipeName) editRecipeName.onchange = ()=>{ updateRecipeMeta(editRecipeName.dataset.recipe, 'name', editRecipeName.value.trim()); };
   const editRecipeCategory = document.getElementById('edit-recipe-category');
   if(editRecipeCategory) editRecipeCategory.onchange = ()=>{ updateRecipeMeta(editRecipeCategory.dataset.recipe, 'category', editRecipeCategory.value.trim()); };
+  const editRecipeDifficulty = document.getElementById('edit-recipe-difficulty');
+  if(editRecipeDifficulty) editRecipeDifficulty.onchange = ()=>{ updateRecipeDifficulty(editRecipeDifficulty.dataset.recipe, editRecipeDifficulty.value); };
   const deleteRecipeBtn = document.getElementById('btn-delete-recipe');
   if(deleteRecipeBtn) deleteRecipeBtn.onclick = ()=>{
     if(confirm('این محصول برای همیشه حذف شود؟')){
@@ -983,11 +1134,12 @@ function exportExcel(){
   ws1['!cols'] = [{wch:28},{wch:10},{wch:20},{wch:15},{wch:22},{wch:22}];
   XLSX.utils.book_append_sheet(wb, ws1, 'مواد اولیه');
 
-  const recRows = [['نام محصول','دسته','هزینه مواد (هزار تومان)','قیمت نهایی (هزار تومان)','وضعیت']];
+  const recRows = [['نام محصول','دسته','سختی تهیه','منبع سختی','ضریب سختی','هزینه مواد (هزار تومان)','قیمت نهایی (هزار تومان)','وضعیت']];
   STATE.recipes.forEach(r=>{
     const c = computeRecipeCost(r);
     const needsReview = r.items.some(it=>!it.isGarnish && (it.needsReview || (ingredientById(it.ingredientId)?.unitPrice||0)===0));
-    recRows.push([r.name, r.category||'', Math.round(c.material), Math.round(c.finalPrice), needsReview?'نیاز به بررسی':'کامل']);
+    const hasOverride = r.difficultyOverride !== undefined && r.difficultyOverride !== null;
+    recRows.push([r.name, r.category||'', c.difficulty, hasOverride?'اختصاصی محصول':'دسته', c.difficultyMult, Math.round(c.material), Math.round(c.finalPrice), needsReview?'نیاز به بررسی':'کامل']);
   });
   const ws2 = XLSX.utils.aoa_to_sheet(recRows);
   ws2['!cols'] = [{wch:26},{wch:18},{wch:20},{wch:20},{wch:14}];
@@ -1012,7 +1164,11 @@ function exportExcel(){
     ['هزینه سربار (هزار تومان)', s.overheadCost],
     ['هزینه بسته‌بندی (هزار تومان)', s.packagingCost],
     ['سایر هزینه‌ها (هزار تومان)', s.otherCost],
+    ['افزایش قیمت هر سطح سختی (٪)', (s.difficultyStepRate||0.10)*100],
   ];
+  Object.keys(s.categoryDifficulty||{}).sort((a,b)=>a.localeCompare(b,'fa')).forEach(cat=>{
+    setRows.push([`سختی تهیه دسته: ${cat}`, s.categoryDifficulty[cat]]);
+  });
   const ws4 = XLSX.utils.aoa_to_sheet(setRows);
   ws4['!cols'] = [{wch:26},{wch:14}];
   XLSX.utils.book_append_sheet(wb, ws4, 'تنظیمات فرمول');
