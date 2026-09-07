@@ -176,7 +176,7 @@ select:focus{outline:2px solid var(--plum-soft);border-color:var(--plum)}
 <body>
 <div id="root" class="app"></div>
 <script>
-const SEED_DATA = {"ingredients":[],"recipes":[],"settings":{"wasteRate":0.1,"overheadCost":0,"packagingCost":0,"otherCost":0,"marginRate":0.5}};
+const SEED_DATA = {"ingredients":[{"id":"ing_coffee","name":"قهوه","unitPrice":2.5,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":2500},{"id":"ing_milk","name":"شیر","unitPrice":0.11,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":110},{"id":"ing_sugar","name":"شکر","unitPrice":0.122,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":122},{"id":"ing_honey","name":"عسل","unitPrice":1.1,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1100},{"id":"ing_icecream","name":"بستنی وانیلی","unitPrice":0.42,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":420},{"id":"ing_banana","name":"موز","unitPrice":0.167,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":167},{"id":"ing_strawberry","name":"توت فرنگی","unitPrice":0.5,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":500},{"id":"ing_mango","name":"انبه","unitPrice":1.25,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1250},{"id":"ing_lemon","name":"لیموترش","unitPrice":0.58,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":580},{"id":"ing_mint","name":"نعنا","unitPrice":0.15,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":150},{"id":"ing_soda","name":"سودا","unitPrice":0.06,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":60},{"id":"ing_hotchoc","name":"هات چاکلت","unitPrice":1.69,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1690}],"recipes":[{"id":"rec_espresso","name":"اسپرسو","items":[{"ingredientId":"ing_coffee","qty":18,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_latte","name":"لاته","items":[{"ingredientId":"ing_coffee","qty":18,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_hot","name":"هات چاکلت","items":[{"ingredientId":"ing_hotchoc","qty":30,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_tea","name":"چای عسل","items":[{"ingredientId":"ing_honey","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم","difficultyOverride":2},{"id":"rec_banana","name":"شیک موز","items":[{"ingredientId":"ing_icecream","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_banana","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_strawberry","name":"شیک توت فرنگی","items":[{"ingredientId":"ing_icecream","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_strawberry","qty":70,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_lemonade","name":"لیموناد","items":[{"ingredientId":"ing_lemon","qty":25,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_sugar","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_soda","qty":150,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_mojito","name":"موهیتو","items":[{"ingredientId":"ing_lemon","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_soda","qty":140,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_mint","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_sugar","qty":15,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد","difficultyOverride":3}],"settings":{"wasteRate":0.1,"overheadCost":89.0625,"packagingCost":18,"otherCost":16,"marginRate":0.5}};
 const UNIT_LABEL = { gram: 'گرم', kg: 'کیلو', count: 'عدد' };
 
 const fa = (n) => Number(n).toLocaleString('fa-IR', {maximumFractionDigits:2});
@@ -202,7 +202,7 @@ let UI = {
   categoryFilter: '',
 };
 
-// ---------- SQLite-backed storage via local Flask API ----------
+// ---------- Browser-local storage (GitHub Pages demo) ----------
 const DATA_KEY = 'app-data-v2';
 const LOG_KEY = 'app-log-v2';
 
@@ -261,19 +261,13 @@ async function loadState(){
 
 async function safeGet(key){
   try{
-    const r = await fetch('/api/storage/'+encodeURIComponent(key));
-    if(r.status===404) return null;
-    if(!r.ok) throw new Error('storage get failed');
-    const x = await r.json();
-    return x.value ?? null;
-  }catch(e){ console.error(e); return null; }
+    const raw = localStorage.getItem('pricing-app-demo:' + key);
+    return raw === null ? null : JSON.parse(raw);
+  }catch(e){ console.error('storage get failed', key, e); return null; }
 }
 async function safeSet(key, val){
   try{
-    const r = await fetch('/api/storage/'+encodeURIComponent(key), {
-      method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({value:val})
-    });
-    if(!r.ok) throw new Error('storage set failed');
+    localStorage.setItem('pricing-app-demo:' + key, JSON.stringify(val));
   }catch(e){ console.error('storage set failed', key, e); }
 }
 async function persistData(){
@@ -641,8 +635,8 @@ function renderTopbar(){
   return `
   <div class="topbar">
     <div class="brand">
-      <h1>سامانه کنترل قیمت منو <span class="tag">Item Cost</span></h1>
-      <p>محاسبه خودکار قیمت تمام آیتم‌ها بر اساس قیمت مواد اولیه؛ با ثبت لاگ تغییرات. مبالغ بر حسب <b>هزار تومان</b>.</p>
+      <h1>سامانه کنترل قیمت منو <span class="tag">DEMO</span></h1>
+      <p>دموی آنلاین بدون نیاز به سرور یا دیتابیس؛ اطلاعات فقط در مرورگر شما ذخیره می‌شود. مبالغ بر حسب <b>هزار تومان</b>.</p>
     </div>
     <div class="actions">
       <button class="primary" id="btn-export">⬇ خروجی اکسل</button>
