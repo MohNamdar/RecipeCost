@@ -27,6 +27,33 @@
   --radius:10px;
   --shadow:0 1px 2px rgba(35,36,32,.06), 0 4px 14px rgba(35,36,32,.05);
 }
+html[data-theme="dark"]{
+  --bg:#171916;
+  --surface:#232620;
+  --surface-2:#2B2F2A;
+  --border:#3B413A;
+  --ink:#F1F3EE;
+  --ink-soft:#AEB5AA;
+  --plum:#D06A8D;
+  --plum-dark:#B65376;
+  --plum-soft:#4A2B38;
+  --mango:#E0A15C;
+  --mango-soft:#4A3825;
+  --green:#79B18E;
+  --green-soft:#24382C;
+  --red:#E27B70;
+  --red-soft:#422825;
+}
+html[data-theme="dark"] input[type=number],
+html[data-theme="dark"] input[type=text],
+html[data-theme="dark"] select,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .toolbar{background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] .inline-name-input,
+html[data-theme="dark"] .recipe-name-input,
+html[data-theme="dark"] .recipe-container-input{color:var(--ink)}
+html[data-theme="dark"] .tabs{background:var(--surface-2)}
+html[data-theme="dark"] .modal-bg{background:rgba(0,0,0,.62)}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
@@ -201,6 +228,24 @@ let UI = {
   productSearch: '',
   categoryFilter: '',
 };
+const THEME_KEY = 'recipe-cost-theme';
+function applyTheme(theme){
+  const t = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = t;
+  try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
+}
+function initTheme(){
+  let t = 'light';
+  try{ t = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
+  applyTheme(t);
+}
+function toggleTheme(){
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  render();
+}
+initTheme();
+
 
 // ---------- Browser-local storage (GitHub Pages demo) ----------
 const DATA_KEY = 'app-data-v2';
@@ -564,6 +609,38 @@ function createRecipe(name, category){
   return r;
 }
 
+function duplicateRecipe(recipeId){
+  const source = recipeById(recipeId);
+  if(!source) return;
+  const prevCosts = allRecipeCosts();
+  const baseName = `${source.name} (کپی)`;
+  let name = baseName, n = 2;
+  while(STATE.recipes.some(r => r.name.trim().toLowerCase() === name.trim().toLowerCase())){
+    name = `${baseName} ${n++}`;
+  }
+  const copy = {
+    id: uid('rec'),
+    name,
+    category: source.category || '',
+    items: (source.items || []).map(it => ({...it})),
+  };
+  if(source.difficultyOverride !== undefined && source.difficultyOverride !== null){
+    copy.difficultyOverride = source.difficultyOverride;
+  }
+  STATE.recipes.push(copy);
+  if(copy.category){
+    if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
+    if(STATE.settings.categoryDifficulty[copy.category] === undefined) STATE.settings.categoryDifficulty[copy.category] = 1;
+  }
+  persistData();
+  applyChangeAndLog({
+    type:'recipe_duplicate', targetId:copy.id, targetName:copy.name,
+    field:'کپی محصول با رسپی کامل', oldValue:source.name, newValue:copy.name
+  }, prevCosts);
+  UI.editModal = {type:'recipe', id:copy.id};
+  render();
+}
+
 function deleteRecipe(recipeId){
   const r = recipeById(recipeId);
   if(!r) return;
@@ -640,6 +717,7 @@ function renderTopbar(){
     </div>
     <div class="actions">
       <button class="primary" id="btn-export">⬇ خروجی اکسل</button>
+      <button id="btn-theme-toggle" title="تغییر حالت روشن/تاریک">${document.documentElement.dataset.theme === 'dark' ? '☀️ حالت روشن' : '🌙 حالت تاریک'}</button>
     </div>
   </div>`;
 }
@@ -704,8 +782,8 @@ function renderProducts(){
 function renderProductsListOnly(){
   const q = UI.productSearch.trim();
   const list = STATE.recipes.filter(r => (!q || r.name.includes(q)) && (!UI.categoryFilter || r.category===UI.categoryFilter));
-  return `<div style="overflow-x:auto"><table><thead><tr><th>نام محصول</th><th>دسته</th><th>هزینه مواد</th><th>قیمت نهایی</th><th>وضعیت</th></tr></thead><tbody>
-    ${list.map(r=>{ const c=computeRecipeCost(r); const needsReview=r.items.some(it=>!it.isGarnish&&(it.needsReview||(ingredientById(it.ingredientId)?.unitPrice||0)===0)); return `<tr class="clickable" data-open-recipe="${r.id}"><td><b>${r.name}</b></td><td style="color:var(--ink-soft)">${r.category||'—'}</td><td class="num">${price(c.material)}</td><td class="num"><b>${price(c.finalPrice)}</b></td><td>${needsReview?'<span class="pill bad">نیاز به بررسی</span>':'<span class="pill ok">کامل</span>'}</td></tr>`; }).join('') || `<tr><td colspan="5" class="empty">موردی یافت نشد</td></tr>`}
+  return `<div style="overflow-x:auto"><table><thead><tr><th>نام محصول</th><th>دسته</th><th>هزینه مواد</th><th>قیمت نهایی</th><th>وضعیت</th><th></th></tr></thead><tbody>
+    ${list.map(r=>{ const c=computeRecipeCost(r); const needsReview=r.items.some(it=>!it.isGarnish&&(it.needsReview||(ingredientById(it.ingredientId)?.unitPrice||0)===0)); return `<tr class="clickable" data-open-recipe="${r.id}"><td><b>${r.name}</b></td><td style="color:var(--ink-soft)">${r.category||'—'}</td><td class="num">${price(c.material)}</td><td class="num"><b>${price(c.finalPrice)}</b></td><td>${needsReview?'<span class="pill bad">نیاز به بررسی</span>':'<span class="pill ok">کامل</span>'}</td><td><button class="ghost" data-duplicate-recipe="${r.id}" style="font-size:12px;padding:5px 9px" title="کپی کامل رسپی">⧉ کپی</button></td></tr>`; }).join('') || `<tr><td colspan="6" class="empty">موردی یافت نشد</td></tr>`}
   </tbody></table></div>`;
 }
 
@@ -767,7 +845,10 @@ function renderRecipeModal(recipeId){
     </div>
   </div>
   <div class="modal-foot" style="justify-content:space-between">
-    <button class="danger" id="btn-delete-recipe" data-recipe="${r.id}">حذف محصول</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="danger" id="btn-delete-recipe" data-recipe="${r.id}">حذف محصول</button>
+      <button id="btn-duplicate-recipe" data-recipe="${r.id}">⧉ کپی کامل رسپی</button>
+    </div>
     <button class="primary" id="modal-close2">تمام</button>
   </div>`;
 }
@@ -941,6 +1022,8 @@ function attachHandlers(){
 
   const exportBtn = document.getElementById('btn-export');
   if(exportBtn) exportBtn.onclick = exportExcel;
+  const themeBtn = document.getElementById('btn-theme-toggle');
+  if(themeBtn) themeBtn.onclick = toggleTheme;
 
   // ---------- products tab ----------
   wireSearchInput('product-search', 'products-list-wrapper', v=>{ UI.productSearch = v; }, renderProductsListOnly, ()=>attachProductsListHandlers());
@@ -1012,12 +1095,24 @@ function attachHandlers(){
     const qty = parseFloat(document.getElementById('new-item-qty').value) || 0;
     let ingId;
     if(newName){
-      const created = createIngredient(newName, newPurchasePrice, newPurchaseQty, newUnit);
-      ingId = created.id;
+      const normalizedName = newName.trim().replace(/\s+/g,' ').toLocaleLowerCase('fa-IR');
+      const existing = STATE.ingredients.find(i =>
+        (i.name || '').trim().replace(/\s+/g,' ').toLocaleLowerCase('fa-IR') === normalizedName
+      );
+      if(existing){
+        ingId = existing.id;
+      } else {
+        const created = createIngredient(newName, newPurchasePrice, newPurchaseQty, newUnit);
+        ingId = created.id;
+      }
     } else {
       ingId = document.getElementById('new-item-ing').value;
     }
     if(!ingId){ alert('ماده اولیه را انتخاب کنید یا نام جدید وارد کنید.'); return; }
+    if(recipeById(recipeId).items.some(i=>i.ingredientId===ingId)){
+      alert(`«${ingredientById(ingId)?.name || 'این ماده'}» قبلاً در این رسپی وجود دارد.`);
+      return;
+    }
     addIngredientToRecipe(recipeId, ingId, qty);
   };
   const editRecipeName = document.getElementById('edit-recipe-name');
@@ -1063,6 +1158,9 @@ function attachHandlers(){
 function attachProductsListHandlers(){
   document.querySelectorAll('[data-open-recipe]').forEach(el=>{
     el.onclick = ()=>{ UI.editModal = {type:'recipe', id: el.dataset.openRecipe}; render(); };
+  });
+  document.querySelectorAll('[data-duplicate-recipe]').forEach(el=>{
+    el.onclick = (e)=>{ e.stopPropagation(); duplicateRecipe(el.dataset.duplicateRecipe); };
   });
 }
 
