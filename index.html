@@ -27,33 +27,6 @@
   --radius:10px;
   --shadow:0 1px 2px rgba(35,36,32,.06), 0 4px 14px rgba(35,36,32,.05);
 }
-html[data-theme="dark"]{
-  --bg:#171916;
-  --surface:#232620;
-  --surface-2:#2B2F2A;
-  --border:#3B413A;
-  --ink:#F1F3EE;
-  --ink-soft:#AEB5AA;
-  --plum:#D06A8D;
-  --plum-dark:#B65376;
-  --plum-soft:#4A2B38;
-  --mango:#E0A15C;
-  --mango-soft:#4A3825;
-  --green:#79B18E;
-  --green-soft:#24382C;
-  --red:#E27B70;
-  --red-soft:#422825;
-}
-html[data-theme="dark"] input[type=number],
-html[data-theme="dark"] input[type=text],
-html[data-theme="dark"] select,
-html[data-theme="dark"] .modal,
-html[data-theme="dark"] .toolbar{background:var(--surface);color:var(--ink)}
-html[data-theme="dark"] .inline-name-input,
-html[data-theme="dark"] .recipe-name-input,
-html[data-theme="dark"] .recipe-container-input{color:var(--ink)}
-html[data-theme="dark"] .tabs{background:var(--surface-2)}
-html[data-theme="dark"] .modal-bg{background:rgba(0,0,0,.62)}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
@@ -203,7 +176,7 @@ select:focus{outline:2px solid var(--plum-soft);border-color:var(--plum)}
 <body>
 <div id="root" class="app"></div>
 <script>
-const SEED_DATA = {"ingredients":[{"id":"ing_coffee","name":"قهوه","unitPrice":2.5,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":2500},{"id":"ing_milk","name":"شیر","unitPrice":0.11,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":110},{"id":"ing_sugar","name":"شکر","unitPrice":0.122,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":122},{"id":"ing_honey","name":"عسل","unitPrice":1.1,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1100},{"id":"ing_icecream","name":"بستنی وانیلی","unitPrice":0.42,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":420},{"id":"ing_banana","name":"موز","unitPrice":0.167,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":167},{"id":"ing_strawberry","name":"توت فرنگی","unitPrice":0.5,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":500},{"id":"ing_mango","name":"انبه","unitPrice":1.25,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1250},{"id":"ing_lemon","name":"لیموترش","unitPrice":0.58,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":580},{"id":"ing_mint","name":"نعنا","unitPrice":0.15,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":150},{"id":"ing_soda","name":"سودا","unitPrice":0.06,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":60},{"id":"ing_hotchoc","name":"هات چاکلت","unitPrice":1.69,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1690}],"recipes":[{"id":"rec_espresso","name":"اسپرسو","items":[{"ingredientId":"ing_coffee","qty":18,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_latte","name":"لاته","items":[{"ingredientId":"ing_coffee","qty":18,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_hot","name":"هات چاکلت","items":[{"ingredientId":"ing_hotchoc","qty":30,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_tea","name":"چای عسل","items":[{"ingredientId":"ing_honey","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم","difficultyOverride":2},{"id":"rec_banana","name":"شیک موز","items":[{"ingredientId":"ing_icecream","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_banana","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_strawberry","name":"شیک توت فرنگی","items":[{"ingredientId":"ing_icecream","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_strawberry","qty":70,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_lemonade","name":"لیموناد","items":[{"ingredientId":"ing_lemon","qty":25,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_sugar","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_soda","qty":150,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_mojito","name":"موهیتو","items":[{"ingredientId":"ing_lemon","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_soda","qty":140,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_mint","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_sugar","qty":15,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد","difficultyOverride":3}],"settings":{"wasteRate":0.1,"overheadCost":89.0625,"packagingCost":18,"otherCost":16,"marginRate":0.5}};
+const SEED_DATA = {"ingredients":[{"id":"ing_coffee","name":"قهوه","unitPrice":2.5,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":2500},{"id":"ing_milk","name":"شیر","unitPrice":0.11,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":110},{"id":"ing_sugar","name":"شکر","unitPrice":0.122,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":122},{"id":"ing_honey","name":"عسل","unitPrice":1.1,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1100},{"id":"ing_icecream","name":"بستنی وانیلی","unitPrice":0.42,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":420},{"id":"ing_banana","name":"موز","unitPrice":0.167,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":167},{"id":"ing_strawberry","name":"توت فرنگی","unitPrice":0.5,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":500},{"id":"ing_mango","name":"انبه","unitPrice":1.25,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1250},{"id":"ing_lemon","name":"لیموترش","unitPrice":0.58,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":580},{"id":"ing_mint","name":"نعنا","unitPrice":0.15,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":150},{"id":"ing_soda","name":"سودا","unitPrice":0.06,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":60},{"id":"ing_hotchoc","name":"هات چاکلت","unitPrice":1.69,"unit":"gram","linked":true,"purchaseQty":1000,"purchasePrice":1690}],"recipes":[{"id":"rec_espresso","name":"اسپرسو","items":[{"ingredientId":"ing_coffee","qty":18,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_latte","name":"لاته","items":[{"ingredientId":"ing_coffee","qty":18,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_hot","name":"هات چاکلت","items":[{"ingredientId":"ing_hotchoc","qty":30,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم"},{"id":"rec_tea","name":"چای عسل","items":[{"ingredientId":"ing_honey","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی گرم","difficultyOverride":2},{"id":"rec_banana","name":"شیک موز","items":[{"ingredientId":"ing_icecream","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_banana","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_strawberry","name":"شیک توت فرنگی","items":[{"ingredientId":"ing_icecream","qty":180,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_milk","qty":80,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_strawberry","qty":70,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_lemonade","name":"لیموناد","items":[{"ingredientId":"ing_lemon","qty":25,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_sugar","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_soda","qty":150,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد"},{"id":"rec_mojito","name":"موهیتو","items":[{"ingredientId":"ing_lemon","qty":20,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_soda","qty":140,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_mint","qty":10,"qtyRawText":null,"isGarnish":false,"needsReview":false},{"ingredientId":"ing_sugar","qty":15,"qtyRawText":null,"isGarnish":false,"needsReview":false}],"category":"نوشیدنی سرد","difficultyOverride":3}],"settings":{"wasteRate":0.1,"overheadCost":89.0625,"packagingCost":18,"otherCost":16,"marginRate":0.45,"marginMode":"main","categoryMargins":{},"difficultyWorkCosts":{"1":0,"2":15,"3":30,"4":45,"5":60},"roundingEnabled":true,"roundingBase":5}};
 const UNIT_LABEL = { gram: 'گرم', kg: 'کیلو', count: 'عدد' };
 
 const fa = (n) => Number(n).toLocaleString('fa-IR', {maximumFractionDigits:2});
@@ -228,24 +201,6 @@ let UI = {
   productSearch: '',
   categoryFilter: '',
 };
-const THEME_KEY = 'recipe-cost-theme';
-function applyTheme(theme){
-  const t = theme === 'dark' ? 'dark' : 'light';
-  document.documentElement.dataset.theme = t;
-  try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
-}
-function initTheme(){
-  let t = 'light';
-  try{ t = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
-  applyTheme(t);
-}
-function toggleTheme(){
-  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  applyTheme(next);
-  render();
-}
-initTheme();
-
 
 // ---------- Browser-local storage (GitHub Pages demo) ----------
 const DATA_KEY = 'app-data-v2';
@@ -259,13 +214,16 @@ async function loadState(){
       STATE.recipes = dataRes.recipes || [];
       STATE.settings = dataRes.settings || {};
       if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
-      if(STATE.settings.difficultyStepRate === undefined) STATE.settings.difficultyStepRate = 0.10;
+      if(!STATE.settings.marginMode) STATE.settings.marginMode = 'main';
+      if(!STATE.settings.categoryMargins) STATE.settings.categoryMargins = {};
+      if(!STATE.settings.difficultyWorkCosts) STATE.settings.difficultyWorkCosts = {1:0,2:15,3:30,4:45,5:60};
+      if(STATE.settings.roundingEnabled === undefined) STATE.settings.roundingEnabled = true;
+      if(STATE.settings.roundingBase === undefined) STATE.settings.roundingBase = 5;
     } else {
       STATE.ingredients = JSON.parse(JSON.stringify(SEED_DATA.ingredients));
       STATE.recipes = JSON.parse(JSON.stringify(SEED_DATA.recipes));
       STATE.settings = JSON.parse(JSON.stringify(SEED_DATA.settings));
       STATE.settings.categoryDifficulty = {};
-      STATE.settings.difficultyStepRate = 0.10;
       await persistData();
     }
     // migrate older records defensively
@@ -282,11 +240,18 @@ async function loadState(){
       }
     });
     if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
-    if(STATE.settings.difficultyStepRate === undefined) STATE.settings.difficultyStepRate = 0.10;
+    if(!STATE.settings.marginMode) STATE.settings.marginMode = 'main';
+    if(!STATE.settings.categoryMargins) STATE.settings.categoryMargins = {};
+    if(!STATE.settings.difficultyWorkCosts) STATE.settings.difficultyWorkCosts = {1:0,2:15,3:30,4:45,5:60};
+    if(STATE.settings.roundingEnabled === undefined) STATE.settings.roundingEnabled = true;
+    if(STATE.settings.roundingBase === undefined) STATE.settings.roundingBase = 5;
     // Every known category starts at difficulty 1 unless it already has a saved value.
     STATE.recipes.forEach(r=>{
       if(r.category && STATE.settings.categoryDifficulty[r.category] === undefined){
         STATE.settings.categoryDifficulty[r.category] = 1;
+      }
+      if(r.category && STATE.settings.categoryMargins[r.category] === undefined){
+        STATE.settings.categoryMargins[r.category] = Number(STATE.settings.marginRate || 0.45);
       }
     });
     STATE.log = logRes || [];
@@ -297,7 +262,11 @@ async function loadState(){
     STATE.recipes = JSON.parse(JSON.stringify(SEED_DATA.recipes));
     STATE.settings = JSON.parse(JSON.stringify(SEED_DATA.settings));
     STATE.settings.categoryDifficulty = {};
-    STATE.settings.difficultyStepRate = 0.10;
+    STATE.settings.marginMode = 'main';
+    STATE.settings.categoryMargins = {};
+    STATE.settings.difficultyWorkCosts = {1:0,2:15,3:30,4:45,5:60};
+    STATE.settings.roundingEnabled = true;
+    STATE.settings.roundingBase = 5;
     STATE.log = [];
   }
   STATE.loaded = true;
@@ -339,14 +308,32 @@ function getRecipeDifficulty(recipe){
   return getCategoryDifficulty(recipe ? recipe.category : '');
 }
 
-function difficultyMultiplier(level){
-  // Difficulty 1..5 => 0%, 10%, 20%, 30%, 40% increase.
-  const step = Number(STATE.settings.difficultyStepRate);
-  return 1 + (Math.max(1, Math.min(5, Number(level)||1)) - 1) * (Number.isFinite(step) ? step : 0.10);
+function difficultyWork(level){
+  const costs = STATE.settings.difficultyWorkCosts || {};
+  const v = Math.max(1, Math.min(5, Number(level)||1));
+  const amount = Number(costs[v] ?? costs[String(v)] ?? 0);
+  return Number.isFinite(amount) ? amount : 0;
 }
 
 function difficultyLabel(level){
   return `سختی ${fa(level)}`;
+}
+
+function getRecipeMargin(recipe){
+  const main = Number(STATE.settings.marginRate);
+  if(STATE.settings.marginMode === 'category' && recipe && recipe.category){
+    const v = Number((STATE.settings.categoryMargins || {})[recipe.category]);
+    if(Number.isFinite(v)) return v;
+  }
+  return Number.isFinite(main) ? main : 0.45;
+}
+
+function roundFinalPrice(value){
+  const s = STATE.settings;
+  if(!s.roundingEnabled) return value;
+  const base = Number(s.roundingBase);
+  if(!Number.isFinite(base) || base <= 0) return value;
+  return Math.round(value / base) * base;
 }
 
 function computeRecipeCost(recipe){
@@ -359,11 +346,28 @@ function computeRecipeCost(recipe){
   }
   const s = STATE.settings;
   const difficulty = getRecipeDifficulty(recipe);
-  const difficultyMult = difficultyMultiplier(difficulty);
-  const baseBeforeMargin = ((material * (1+s.wasteRate)) + s.overheadCost + s.packagingCost + s.otherCost);
-  const adjustedBase = baseBeforeMargin * difficultyMult;
-  const finalPrice = adjustedBase * (1+s.marginRate);
-  return { material, difficulty, difficultyMult, baseBeforeMargin, adjustedBase, finalPrice };
+  const workCost = difficultyWork(difficulty);
+  const materialWithWaste = material * (1 + Number(s.wasteRate || 0));
+  const overhead = Number(s.overheadCost || 0) + Number(s.packagingCost || 0) + Number(s.otherCost || 0);
+  const baseBeforeMargin = materialWithWaste + workCost + overhead;
+  const marginRate = getRecipeMargin(recipe);
+  const rawFinalPrice = baseBeforeMargin * (1 + marginRate);
+  const finalPrice = roundFinalPrice(rawFinalPrice);
+  return {
+    material,
+    materialWithWaste,
+    wasteCost: materialWithWaste - material,
+    difficulty,
+    workCost,
+    overhead,
+    overheadCost: Number(s.overheadCost || 0),
+    packagingCost: Number(s.packagingCost || 0),
+    otherCost: Number(s.otherCost || 0),
+    baseBeforeMargin,
+    marginRate,
+    rawFinalPrice,
+    finalPrice
+  };
 }
 
 function allRecipeCosts(){
@@ -487,6 +491,26 @@ function updateSetting(key, newVal, label){
   render();
 }
 
+function updateCategoryMargin(category, newMargin){
+  category = (category || '').trim();
+  if(!category) return;
+  newMargin = Number(newMargin);
+  if(!Number.isFinite(newMargin)) return;
+  newMargin = Math.max(0, Math.min(2, newMargin));
+  if(!STATE.settings.categoryMargins) STATE.settings.categoryMargins = {};
+  const oldMargin = Number(STATE.settings.categoryMargins[category] ?? STATE.settings.marginRate ?? 0.45);
+  if(oldMargin === newMargin && STATE.settings.categoryMargins[category] !== undefined) return;
+  const prevCosts = allRecipeCosts();
+  STATE.settings.categoryMargins[category] = newMargin;
+  persistData();
+  const affected = applyChangeAndLog({
+    type:'category_margin', targetId:category, targetName:category,
+    field:'سود دسته', oldValue:oldMargin, newValue:newMargin
+  }, prevCosts);
+  showBanner(affected, `سود دسته «${category}»`);
+  render();
+}
+
 function updateCategoryDifficulty(category, newLevel){
   category = (category || '').trim();
   if(!category) return;
@@ -587,6 +611,8 @@ function updateRecipeMeta(recipeId, field, value){
   if(field === 'category' && value){
     if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
     if(STATE.settings.categoryDifficulty[value] === undefined) STATE.settings.categoryDifficulty[value] = 1;
+    if(!STATE.settings.categoryMargins) STATE.settings.categoryMargins = {};
+    if(STATE.settings.categoryMargins[value] === undefined) STATE.settings.categoryMargins[value] = Number(STATE.settings.marginRate || 0.45);
   }
   persistData();
   const affected = applyChangeAndLog({
@@ -602,43 +628,13 @@ function createRecipe(name, category){
   if(r.category){
     if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
     if(STATE.settings.categoryDifficulty[r.category] === undefined) STATE.settings.categoryDifficulty[r.category] = 1;
+    if(!STATE.settings.categoryMargins) STATE.settings.categoryMargins = {};
+    if(STATE.settings.categoryMargins[r.category] === undefined) STATE.settings.categoryMargins[r.category] = Number(STATE.settings.marginRate || 0.45);
   }
   STATE.recipes.push(r);
   persistData();
   applyChangeAndLog({ type:'recipe_add', targetId:r.id, targetName:name, field:'محصول جدید', oldValue:'-', newValue:'-' }, allRecipeCosts());
   return r;
-}
-
-function duplicateRecipe(recipeId){
-  const source = recipeById(recipeId);
-  if(!source) return;
-  const prevCosts = allRecipeCosts();
-  const baseName = `${source.name} (کپی)`;
-  let name = baseName, n = 2;
-  while(STATE.recipes.some(r => r.name.trim().toLowerCase() === name.trim().toLowerCase())){
-    name = `${baseName} ${n++}`;
-  }
-  const copy = {
-    id: uid('rec'),
-    name,
-    category: source.category || '',
-    items: (source.items || []).map(it => ({...it})),
-  };
-  if(source.difficultyOverride !== undefined && source.difficultyOverride !== null){
-    copy.difficultyOverride = source.difficultyOverride;
-  }
-  STATE.recipes.push(copy);
-  if(copy.category){
-    if(!STATE.settings.categoryDifficulty) STATE.settings.categoryDifficulty = {};
-    if(STATE.settings.categoryDifficulty[copy.category] === undefined) STATE.settings.categoryDifficulty[copy.category] = 1;
-  }
-  persistData();
-  applyChangeAndLog({
-    type:'recipe_duplicate', targetId:copy.id, targetName:copy.name,
-    field:'کپی محصول با رسپی کامل', oldValue:source.name, newValue:copy.name
-  }, prevCosts);
-  UI.editModal = {type:'recipe', id:copy.id};
-  render();
 }
 
 function deleteRecipe(recipeId){
@@ -661,8 +657,10 @@ function revertLogEntry(logId){
     if(key) updateIngredientUnit(entry.targetId, key);
   } else if(entry.type === 'setting'){
     updateSetting(entry.targetId, entry.oldValue, entry.targetName);
-  } else if(entry.type === 'category_difficulty'){
+   } else if(entry.type === 'category_difficulty'){
     updateCategoryDifficulty(entry.targetId, entry.oldValue);
+  } else if(entry.type === 'category_margin'){
+    updateCategoryMargin(entry.targetId, entry.oldValue);
   } else if(entry.type === 'recipe_difficulty'){
     if(entry.oldValue === 'دسته') updateRecipeDifficulty(entry.targetId, 'inherit');
     else updateRecipeDifficulty(entry.targetId, entry.oldValue);
@@ -717,7 +715,6 @@ function renderTopbar(){
     </div>
     <div class="actions">
       <button class="primary" id="btn-export">⬇ خروجی اکسل</button>
-      <button id="btn-theme-toggle" title="تغییر حالت روشن/تاریک">${document.documentElement.dataset.theme === 'dark' ? '☀️ حالت روشن' : '🌙 حالت تاریک'}</button>
     </div>
   </div>`;
 }
@@ -782,8 +779,8 @@ function renderProducts(){
 function renderProductsListOnly(){
   const q = UI.productSearch.trim();
   const list = STATE.recipes.filter(r => (!q || r.name.includes(q)) && (!UI.categoryFilter || r.category===UI.categoryFilter));
-  return `<div style="overflow-x:auto"><table><thead><tr><th>نام محصول</th><th>دسته</th><th>هزینه مواد</th><th>قیمت نهایی</th><th>وضعیت</th><th></th></tr></thead><tbody>
-    ${list.map(r=>{ const c=computeRecipeCost(r); const needsReview=r.items.some(it=>!it.isGarnish&&(it.needsReview||(ingredientById(it.ingredientId)?.unitPrice||0)===0)); return `<tr class="clickable" data-open-recipe="${r.id}"><td><b>${r.name}</b></td><td style="color:var(--ink-soft)">${r.category||'—'}</td><td class="num">${price(c.material)}</td><td class="num"><b>${price(c.finalPrice)}</b></td><td>${needsReview?'<span class="pill bad">نیاز به بررسی</span>':'<span class="pill ok">کامل</span>'}</td><td><button class="ghost" data-duplicate-recipe="${r.id}" style="font-size:12px;padding:5px 9px" title="کپی کامل رسپی">⧉ کپی</button></td></tr>`; }).join('') || `<tr><td colspan="6" class="empty">موردی یافت نشد</td></tr>`}
+  return `<div style="overflow-x:auto"><table><thead><tr><th>نام محصول</th><th>دسته</th><th>هزینه مواد</th><th>قیمت نهایی</th><th>وضعیت</th></tr></thead><tbody>
+    ${list.map(r=>{ const c=computeRecipeCost(r); const needsReview=r.items.some(it=>!it.isGarnish&&(it.needsReview||(ingredientById(it.ingredientId)?.unitPrice||0)===0)); return `<tr class="clickable" data-open-recipe="${r.id}"><td><b>${r.name}</b></td><td style="color:var(--ink-soft)">${r.category||'—'}</td><td class="num">${price(c.material)}</td><td class="num"><b>${price(c.finalPrice)}</b></td><td>${needsReview?'<span class="pill bad">نیاز به بررسی</span>':'<span class="pill ok">کامل</span>'}</td></tr>`; }).join('') || `<tr><td colspan="5" class="empty">موردی یافت نشد</td></tr>`}
   </tbody></table></div>`;
 }
 
@@ -825,9 +822,9 @@ function renderRecipeModal(recipeId){
         <div class="hint">اگر جداگانه تعیین کنید، این محصول از سختی دسته مستقل می‌شود.</div>
       </div>
       <div class="field">
-        <label>ضریب فعلی</label>
-        <div class="difficulty-badge" style="margin-top:5px">${fa(difficultyMultiplier(getRecipeDifficulty(r)))}× — ${fa((difficultyMultiplier(getRecipeDifficulty(r))-1)*100)}٪</div>
-        <div class="hint">۱ = بدون افزایش، ۵ = ${fa((difficultyMultiplier(5)-1)*100)}٪ افزایش</div>
+        <label>هزینه کار</label>
+        <div class="difficulty-badge" style="margin-top:5px">${price(c.workCost)}</div>
+        <div class="hint">مبلغ ثابت سختی ${fa(c.difficulty)} در فرمول اضافه می‌شود.</div>
       </div>
     </div>
     <div class="section-title" style="font-size:13px;margin-bottom:8px">اجزای ترکیب</div>
@@ -839,16 +836,15 @@ function renderRecipeModal(recipeId){
       <div class="summary-row"><span>+ سربار</span><span class="num">${price(s.overheadCost)}</span></div>
       <div class="summary-row"><span>+ بسته‌بندی</span><span class="num">${price(s.packagingCost)}</span></div>
       <div class="summary-row"><span>+ سایر هزینه‌ها</span><span class="num">${price(s.otherCost)}</span></div>
-      <div class="summary-row"><span>× سختی تهیه (${difficultyLabel(c.difficulty)} / ${fa((c.difficultyMult-1)*100)}٪)</span><span class="num">${price(c.baseBeforeMargin*(c.difficultyMult-1))}</span></div>
-      <div class="summary-row"><span>× حاشیه سود (${fa(s.marginRate*100)}٪)</span><span></span></div>
+      <div class="summary-row"><span>+ کار (${difficultyLabel(c.difficulty)})</span><span class="num">${price(c.workCost)}</span></div>
+      <div class="summary-row"><span>+ سربار</span><span class="num">${price(c.overhead)}</span></div>
+      <div class="summary-row"><span>× سود (${fa(c.marginRate*100)}٪)</span><span></span></div>
+      ${s.roundingEnabled ? `<div class="summary-row"><span>رند نهایی (مضرب ${fa(s.roundingBase)})</span><span class="num">${price(c.finalPrice-c.rawFinalPrice)}</span></div>` : ''}
       <div class="summary-row total"><span>قیمت نهایی پیشنهادی</span><span class="num">${price(c.finalPrice)}</span></div>
     </div>
   </div>
   <div class="modal-foot" style="justify-content:space-between">
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="danger" id="btn-delete-recipe" data-recipe="${r.id}">حذف محصول</button>
-      <button id="btn-duplicate-recipe" data-recipe="${r.id}">⧉ کپی کامل رسپی</button>
-    </div>
+    <button class="danger" id="btn-delete-recipe" data-recipe="${r.id}">حذف محصول</button>
     <button class="primary" id="modal-close2">تمام</button>
   </div>`;
 }
@@ -934,24 +930,64 @@ function renderSettings(){
   const s = STATE.settings;
   const categories = [...new Set(STATE.recipes.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fa'));
   const map = s.categoryDifficulty || {};
+  const margins = s.categoryMargins || {};
+  const work = s.difficultyWorkCosts || {1:0,2:15,3:30,4:45,5:60};
   return `
   <div class="card pad">
     <div class="section-title">تنظیمات فرمول قیمت‌گذاری</div>
-    <div class="section-sub">پارامترهای عمومی روی همه محصولات اثر می‌گذارند. سختی تهیه دسته نیز به‌صورت همگانی روی محصولات همان دسته اعمال می‌شود، مگر محصول سختی اختصاصی داشته باشد.</div>
-    <div class="grid2" style="margin-top:16px">
-      <div class="field"><label>نرخ ضایعات (٪)</label><input type="number" id="set-waste" value="${s.wasteRate*100}" step="0.5"></div>
-      <div class="field"><label>حاشیه سود (٪)</label><input type="number" id="set-margin" value="${s.marginRate*100}" step="1"></div>
+    <div class="section-sub">فرمول: <b>(مواد × (۱ + ضایعات) + کار + سربار) × (۱ + سود)</b> و سپس در صورت فعال بودن، قیمت نهایی روی مضرب انتخابی رند می‌شود.</div>
+
+    <div class="section-title" style="font-size:13px;margin-top:16px">هزینه‌های پایه</div>
+    <div class="grid2" style="margin-top:10px">
+      <div class="field"><label>نرخ ضایعات (٪)</label><input type="number" id="set-waste" value="${s.wasteRate*100}" step="0.5" min="0"></div>
       <div class="field"><label>هزینه سربار (هزار تومان)</label><input type="number" id="set-overhead" value="${s.overheadCost}" step="1"></div>
       <div class="field"><label>هزینه بسته‌بندی (هزار تومان)</label><input type="number" id="set-packaging" value="${s.packagingCost}" step="1"></div>
       <div class="field"><label>سایر هزینه‌ها (هزار تومان)</label><input type="number" id="set-other" value="${s.otherCost}" step="1"></div>
-      <div class="field"><label>افزایش قیمت هر سطح سختی (٪)</label><input type="number" id="set-difficulty-step" value="${s.difficultyStepRate*100}" step="1" min="0"></div>
     </div>
+
+    <div class="section-title" style="font-size:13px;margin-top:22px">هزینه کار بر اساس سختی</div>
+    <div class="section-sub">سختی دیگر ضریب یا درصد نیست. برای هر سطح یک مبلغ ثابت (هزار تومان) به فرمول اضافه می‌شود.</div>
+    <div class="grid2" style="margin-top:10px">
+      ${[1,2,3,4,5].map(v=>`<div class="field"><label>سختی ${fa(v)} — هزینه کار (هزار تومان)</label><input type="number" id="set-work-${v}" value="${Number(work[v] ?? work[String(v)] ?? 0)}" step="1" min="0"></div>`).join('')}
+    </div>
+
+    <div class="section-title" style="font-size:13px;margin-top:22px">سود</div>
+    <div class="section-sub">سود اصلی مبنای همه دسته‌هاست. اگر حالت «اختصاصی» فعال شود، هر دسته مقدار خودش را دارد؛ مقدار اولیه هر دسته برابر سود اصلی است.</div>
+    <div class="grid2" style="margin-top:10px">
+      <div class="field"><label>سود اصلی (٪)</label><input type="number" id="set-margin" value="${s.marginRate*100}" step="1" min="0"></div>
+      <div class="field"><label>نحوه اعمال سود</label>
+        <select id="set-margin-mode">
+          <option value="main" ${s.marginMode!=='category'?'selected':''}>همه دسته‌ها از سود اصلی</option>
+          <option value="category" ${s.marginMode==='category'?'selected':''}>سود اختصاصی برای هر دسته</option>
+        </select>
+      </div>
+    </div>
+    ${s.marginMode==='category' ? `
+      <div class="category-difficulty-list" style="margin-top:12px">
+        ${categories.length ? categories.map(cat=>`
+          <div class="category-difficulty-row">
+            <div><b>${cat}</b><div class="hint">سود فعلی: ${fa(Number(margins[cat] ?? s.marginRate)*100)}٪</div></div>
+            <div class="qty-with-unit"><input type="number" class="category-margin-input" data-category="${cat}" value="${Number(margins[cat] ?? s.marginRate)*100}" step="1" min="0"></div>
+          </div>`).join('') : '<div class="footnote">هنوز هیچ دسته‌بندی برای محصولات ثبت نشده است.</div>'}
+      </div>` : ''}
+
+    <div class="section-title" style="font-size:13px;margin-top:22px">گرد کردن قیمت</div>
+    <div class="grid2" style="margin-top:10px">
+      <div class="field"><label>فعال بودن رند</label>
+        <select id="set-rounding-enabled">
+          <option value="1" ${s.roundingEnabled?'selected':''}>فعال</option>
+          <option value="0" ${!s.roundingEnabled?'selected':''}>غیرفعال</option>
+        </select>
+      </div>
+      <div class="field"><label>مضرب رند (هزار تومان)</label><input type="number" id="set-rounding-base" value="${s.roundingBase}" step="1" min="1"></div>
+    </div>
+
     <div class="banner" style="margin-top:16px;margin-bottom:0">
-      <div><b>منطق سختی:</b> سختی ۱ = ۰٪ افزایش، سختی ۲ = یک سطح افزایش، ... سختی ۵ = چهار سطح افزایش. مقدار هر سطح از گزینه بالا تعیین می‌شود.</div>
+      <div><b>منطق سختی:</b> سختی فقط «کار» را تغییر می‌دهد؛ مثلاً اگر هزینه کار سختی‌ها ۰، ۱۵، ۳۰، ۴۵، ۶۰ باشد، سطح ۳ دقیقاً ۳۰ هزار تومان به فرمول اضافه می‌کند، نه درصد.</div>
     </div>
     <div style="margin-top:22px">
       <div class="section-title">سختی تهیه به تفکیک دسته‌بندی</div>
-      <div class="section-sub">با تغییر این عدد، همه محصولات آن دسته که سختی اختصاصی ندارند همان لحظه دوباره قیمت‌گذاری می‌شوند.</div>
+      <div class="section-sub">با تغییر این عدد، همه محصولات آن دسته که سختی اختصاصی ندارند دوباره قیمت‌گذاری می‌شوند.</div>
       <div class="category-difficulty-list">
         ${categories.length ? categories.map(cat=>`
           <div class="category-difficulty-row">
@@ -987,7 +1023,7 @@ function renderLog(){
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="log-meta">${l.tsLabel}</span>
-            ${['ingredient_rename','ingredient_unit','setting','recipe_qty'].includes(l.type) ? `<button class="ghost" data-revert="${l.id}" style="font-size:12px;padding:5px 10px">بازگردانی</button>`:''}
+            ${['ingredient_rename','ingredient_unit','setting','recipe_qty','category_margin'].includes(l.type) ? `<button class="ghost" data-revert="${l.id}" style="font-size:12px;padding:5px 10px">بازگردانی</button>`:''}
           </div>
         </div>
         ${l.affected && l.affected.length>0 ? `
@@ -1022,8 +1058,6 @@ function attachHandlers(){
 
   const exportBtn = document.getElementById('btn-export');
   if(exportBtn) exportBtn.onclick = exportExcel;
-  const themeBtn = document.getElementById('btn-theme-toggle');
-  if(themeBtn) themeBtn.onclick = toggleTheme;
 
   // ---------- products tab ----------
   wireSearchInput('product-search', 'products-list-wrapper', v=>{ UI.productSearch = v; }, renderProductsListOnly, ()=>attachProductsListHandlers());
@@ -1049,17 +1083,58 @@ function attachHandlers(){
     const overhead = parseFloat(document.getElementById('set-overhead').value);
     const packaging = parseFloat(document.getElementById('set-packaging').value);
     const other = parseFloat(document.getElementById('set-other').value);
-    const difficultyStep = parseFloat(document.getElementById('set-difficulty-step').value)/100;
-    if(waste !== STATE.settings.wasteRate) updateSetting('wasteRate', waste, 'نرخ ضایعات');
-    if(margin !== STATE.settings.marginRate) updateSetting('marginRate', margin, 'حاشیه سود');
-    if(overhead !== STATE.settings.overheadCost) updateSetting('overheadCost', overhead, 'هزینه سربار');
-    if(packaging !== STATE.settings.packagingCost) updateSetting('packagingCost', packaging, 'هزینه بسته‌بندی');
-    if(other !== STATE.settings.otherCost) updateSetting('otherCost', other, 'سایر هزینه‌ها');
-    if(difficultyStep !== STATE.settings.difficultyStepRate) updateSetting('difficultyStepRate', difficultyStep, 'افزایش قیمت هر سطح سختی');
+    const marginMode = document.getElementById('set-margin-mode').value;
+    const roundingEnabled = document.getElementById('set-rounding-enabled').value === '1';
+    const roundingBase = parseFloat(document.getElementById('set-rounding-base').value);
+
+    if(Number.isFinite(waste) && waste !== STATE.settings.wasteRate) updateSetting('wasteRate', waste, 'نرخ ضایعات');
+    if(Number.isFinite(margin) && margin !== STATE.settings.marginRate) updateSetting('marginRate', margin, 'سود اصلی');
+    if(Number.isFinite(overhead) && overhead !== STATE.settings.overheadCost) updateSetting('overheadCost', overhead, 'هزینه سربار');
+    if(Number.isFinite(packaging) && packaging !== STATE.settings.packagingCost) updateSetting('packagingCost', packaging, 'هزینه بسته‌بندی');
+    if(Number.isFinite(other) && other !== STATE.settings.otherCost) updateSetting('otherCost', other, 'سایر هزینه‌ها');
+    if(marginMode !== STATE.settings.marginMode) updateSetting('marginMode', marginMode, 'نحوه اعمال سود');
+    if(roundingEnabled !== STATE.settings.roundingEnabled) updateSetting('roundingEnabled', roundingEnabled, 'فعال بودن رند');
+    if(Number.isFinite(roundingBase) && roundingBase > 0 && roundingBase !== STATE.settings.roundingBase) updateSetting('roundingBase', roundingBase, 'مضرب رند');
+
+    const work = {...(STATE.settings.difficultyWorkCosts || {})};
+    let workChanged = false;
+    [1,2,3,4,5].forEach(v=>{
+      const el = document.getElementById(`set-work-${v}`);
+      const val = parseFloat(el.value);
+      if(Number.isFinite(val) && val >= 0 && Number(work[v] ?? work[String(v)] ?? 0) !== val){
+        work[v] = val;
+        workChanged = true;
+      }
+    });
+    if(workChanged) updateSetting('difficultyWorkCosts', work, 'هزینه کار سختی');
+
+    // In category mode, update all visible category margins.
+    document.querySelectorAll('.category-margin-input').forEach(el=>{
+      const val = parseFloat(el.value)/100;
+      if(Number.isFinite(val)) updateCategoryMargin(el.dataset.category, val);
+    });
   };
   document.querySelectorAll('.category-difficulty-select').forEach(el=>{
     el.onchange = ()=> updateCategoryDifficulty(el.dataset.category, el.value);
   });
+  const marginModeSelect = document.getElementById('set-margin-mode');
+  if(marginModeSelect) marginModeSelect.onchange = ()=>{
+    const mode = marginModeSelect.value;
+    if(mode === STATE.settings.marginMode) return;
+    const prevCosts = allRecipeCosts();
+    const oldMode = STATE.settings.marginMode || 'main';
+    STATE.settings.marginMode = mode;
+    if(!STATE.settings.categoryMargins) STATE.settings.categoryMargins = {};
+    STATE.recipes.forEach(r=>{
+      if(r.category && STATE.settings.categoryMargins[r.category] === undefined){
+        STATE.settings.categoryMargins[r.category] = Number(STATE.settings.marginRate || 0.45);
+      }
+    });
+    persistData();
+    const affected = applyChangeAndLog({type:'setting',targetId:'marginMode',targetName:'نحوه اعمال سود',field:'نحوه اعمال سود',oldValue:oldMode,newValue:mode},prevCosts);
+    showBanner(affected,'نحوه اعمال سود');
+    render();
+  };
 
   // ---------- log tab ----------
   document.querySelectorAll('[data-revert]').forEach(el=>{
@@ -1095,24 +1170,12 @@ function attachHandlers(){
     const qty = parseFloat(document.getElementById('new-item-qty').value) || 0;
     let ingId;
     if(newName){
-      const normalizedName = newName.trim().replace(/\s+/g,' ').toLocaleLowerCase('fa-IR');
-      const existing = STATE.ingredients.find(i =>
-        (i.name || '').trim().replace(/\s+/g,' ').toLocaleLowerCase('fa-IR') === normalizedName
-      );
-      if(existing){
-        ingId = existing.id;
-      } else {
-        const created = createIngredient(newName, newPurchasePrice, newPurchaseQty, newUnit);
-        ingId = created.id;
-      }
+      const created = createIngredient(newName, newPurchasePrice, newPurchaseQty, newUnit);
+      ingId = created.id;
     } else {
       ingId = document.getElementById('new-item-ing').value;
     }
     if(!ingId){ alert('ماده اولیه را انتخاب کنید یا نام جدید وارد کنید.'); return; }
-    if(recipeById(recipeId).items.some(i=>i.ingredientId===ingId)){
-      alert(`«${ingredientById(ingId)?.name || 'این ماده'}» قبلاً در این رسپی وجود دارد.`);
-      return;
-    }
     addIngredientToRecipe(recipeId, ingId, qty);
   };
   const editRecipeName = document.getElementById('edit-recipe-name');
@@ -1158,9 +1221,6 @@ function attachHandlers(){
 function attachProductsListHandlers(){
   document.querySelectorAll('[data-open-recipe]').forEach(el=>{
     el.onclick = ()=>{ UI.editModal = {type:'recipe', id: el.dataset.openRecipe}; render(); };
-  });
-  document.querySelectorAll('[data-duplicate-recipe]').forEach(el=>{
-    el.onclick = (e)=>{ e.stopPropagation(); duplicateRecipe(el.dataset.duplicateRecipe); };
   });
 }
 
@@ -1245,14 +1305,23 @@ function exportExcel(){
   const setRows = [
     ['پارامتر','مقدار'],
     ['نرخ ضایعات (٪)', s.wasteRate*100],
-    ['حاشیه سود (٪)', s.marginRate*100],
+    ['سود اصلی (٪)', s.marginRate*100],
+    ['حالت سود', s.marginMode==='category' ? 'اختصاصی برای هر دسته' : 'سود اصلی برای همه'],
     ['هزینه سربار (هزار تومان)', s.overheadCost],
     ['هزینه بسته‌بندی (هزار تومان)', s.packagingCost],
     ['سایر هزینه‌ها (هزار تومان)', s.otherCost],
-    ['افزایش قیمت هر سطح سختی (٪)', (s.difficultyStepRate||0.10)*100],
+    ['گرد کردن قیمت', s.roundingEnabled ? `فعال — مضرب ${s.roundingBase}` : 'غیرفعال'],
+    ['هزینه کار سختی ۱', (s.difficultyWorkCosts||{})[1] ?? 0],
+    ['هزینه کار سختی ۲', (s.difficultyWorkCosts||{})[2] ?? 0],
+    ['هزینه کار سختی ۳', (s.difficultyWorkCosts||{})[3] ?? 0],
+    ['هزینه کار سختی ۴', (s.difficultyWorkCosts||{})[4] ?? 0],
+    ['هزینه کار سختی ۵', (s.difficultyWorkCosts||{})[5] ?? 0],
   ];
   Object.keys(s.categoryDifficulty||{}).sort((a,b)=>a.localeCompare(b,'fa')).forEach(cat=>{
     setRows.push([`سختی تهیه دسته: ${cat}`, s.categoryDifficulty[cat]]);
+  });
+  Object.keys(s.categoryMargins||{}).sort((a,b)=>a.localeCompare(b,'fa')).forEach(cat=>{
+    setRows.push([`سود دسته: ${cat}`, Number(s.categoryMargins[cat])*100]);
   });
   const ws4 = XLSX.utils.aoa_to_sheet(setRows);
   ws4['!cols'] = [{wch:26},{wch:14}];
